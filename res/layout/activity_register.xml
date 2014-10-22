@@ -1,0 +1,169 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ViewSwitcher xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/viewswitcher"
+	android:layout_width="fill_parent"
+	android:layout_height="fill_parent">
+	<RelativeLayout 
+	    android:id="@+id/register_layout"
+	    android:background="@color/textShadow"
+	    android:fadingEdge="horizontal" 
+		android:layout_width="fill_parent"
+		android:layout_height="fill_parent">
+	
+	    <TextView
+	        android:id="@+id/text"
+	        android:layout_width="wrap_content"
+	        android:layout_height="wrap_content"
+	        android:layout_alignParentTop="true"
+	        android:layout_centerHorizontal="true"
+	        android:layout_marginTop="18dp"
+	        android:text="@string/welcome_string"
+	        android:textSize="20sp"
+	        android:textStyle="italic"
+	        android:typeface="serif" />
+	
+	    <EditText
+	        android:id="@+id/username"
+	        android:layout_width="213dip"
+	        android:layout_height="wrap_content"
+	        android:layout_below="@+id/text"
+	        android:layout_centerHorizontal="true"
+	        android:layout_marginTop="17dp"
+	        android:ems="10"
+	        android:gravity="center"
+	        android:hint="@string/username_string"
+	        android:inputType="text"
+	        android:textSize="18sp"
+	        android:textStyle="italic"
+	        android:typeface="sans" />
+	
+	    <EditText
+	        android:id="@+id/number"
+	        android:layout_width="213dip"
+	        android:layout_height="wrap_content"
+	        android:layout_alignLeft="@+id/username"
+	        android:layout_below="@+id/username"
+	        android:layout_marginTop="28dp"
+	        android:ems="10"
+	        android:gravity="center"
+	        android:hint="@string/number_string"
+	        android:password="false"
+	        android:inputType="number"
+	        android:textSize="18sp"
+	        android:textStyle="italic"
+	        android:typeface="sans"
+	        android:visibility="visible" >
+	
+	        <requestFocus />
+	    </EditText>
+	
+	    <RadioGroup
+	        android:id="@+id/radioGroup"
+	        android:layout_width="wrap_content"
+	        android:layout_height="wrap_content"
+	        android:layout_centerHorizontal="true"
+	        android:layout_centerVertical="true" >
+	
+	        <RadioButton
+	            android:id="@+id/lamportRadio"
+	            android:layout_width="wrap_content"
+	            android:layout_height="wrap_content"
+	            android:checked="true"
+	            android:text="Lamport" />
+	
+	        <RadioButton
+	            android:id="@+id/vectorRadio"
+	            android:layout_width="wrap_content"
+	            android:layout_height="wrap_content"
+	            android:text="Vector Clock" />
+	    </RadioGroup>
+	
+	    <CheckBox
+	        android:id="@+id/remember"
+	        android:layout_width="wrap_content"
+	        android:layout_height="wrap_content"
+	        android:layout_below="@+id/radioGroup"
+	        android:layout_centerHorizontal="true"
+	        android:layout_marginTop="40dp"
+	        android:text="Remember me" />
+	
+	    <Button
+	        android:id="@+id/login"
+	        android:layout_width="141px"
+	        android:layout_height="wrap_content"
+	        android:layout_below="@+id/remember"
+	        android:layout_centerHorizontal="true"
+	        android:layout_marginTop="38dp"
+	        android:minWidth="128dip"
+	        android:padding="4dp"
+	        android:text="Login"
+	        android:textSize="22sp"
+	        android:textStyle="bold"
+	        android:typeface="serif" />
+	
+	</RelativeLayout>
+	
+	<RelativeLayout 
+	    android:id="@+id/main_layout"
+	    tools:ignore="MergeRootFrame" 
+	    android:layout_width="fill_parent"
+		android:layout_height="fill_parent">
+	
+	    <LinearLayout
+	        android:id="@+id/bottom_write_bar"
+	        android:layout_width="fill_parent"
+	        android:layout_height="wrap_content"
+	        android:layout_alignParentBottom="true"
+	        android:background="@drawable/message_bar" >
+	
+	        <EditText
+	            android:id="@+id/msgText"
+	            android:layout_width="fill_parent"
+	            android:layout_height="fill_parent"
+	            android:layout_margin="5sp"
+	            android:layout_weight="1"
+	            android:background="@drawable/message_field"
+	            android:hint="Write here"
+	            android:padding="5sp"
+	            android:textColor="@color/textFieldColor" />
+	
+	        <Button
+	            android:id="@+id/sendButton"
+	            android:layout_width="wrap_content"
+	            android:layout_height="fill_parent"
+	            android:layout_margin="5sp"
+	            android:background="@drawable/send_button"
+	            android:onClick="sendMessage"
+	            android:paddingBottom="5sp"
+	            android:paddingLeft="15sp"
+	            android:paddingRight="15sp"
+	            android:paddingTop="5sp"
+	            android:text="@string/send_button"
+	            android:textColor="#FFF" />
+	
+	    </LinearLayout>
+	
+	    <ListView
+	        android:id="@android:id/list"
+	        android:layout_width="fill_parent"
+	        android:layout_height="0dip"
+	        android:layout_above="@id/bottom_write_bar"
+	        android:layout_alignParentTop="true"
+	        android:cacheColorHint="#00000000"
+	        android:divider="#00000000"
+	        android:listSelector="#00000000" >
+	    </ListView>
+	
+	    <TextView
+	        android:id="@android:id/empty"
+	        android:layout_width="fill_parent"
+	        android:layout_height="fill_parent"
+	        android:layout_above="@id/bottom_write_bar"
+	        android:layout_alignParentTop="true"
+	        android:gravity="center_vertical|center_horizontal"
+	        android:text="@string/main_empty_list" />
+	
+	
+	</RelativeLayout>
+</ViewSwitcher>

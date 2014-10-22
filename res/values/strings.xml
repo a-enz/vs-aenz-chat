@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+	<string name="hello">Hello World, MessageActivity!</string>
+	<string name="app_name">VS Chat 2014</string>
+	<string name="main_empty_list">There is no recent conversation, write new message
+		to start one.</string>
+	<string name="send_button">Send</string>
+	<string name="welcome_string">Connect to the VS Chat Server...</string>
+	<string name="username_string">Enter your nethz</string>
+	<string name="number_string">(Opt.) Number</string>
+
+</resources>
