@@ -2,6 +2,8 @@ package ch.ethz.inf.vs.android.aenz.chat;
 
 import java.util.EventListener;
 
+import ch.ethz.inf.vs.android.aenz.chat.ChatEventSource.ChatEvent;
+
 import android.os.Handler;
 
 /**
@@ -23,4 +25,6 @@ public interface ChatEventListener extends EventListener {
 	public Handler getCallbackHandler();
 	
 	// TODO Add all necessary event triggers
+	
+	public abstract void onReceiveChatEvent(ChatEvent e);
 }

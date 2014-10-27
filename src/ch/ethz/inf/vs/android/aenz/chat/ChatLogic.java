@@ -10,6 +10,7 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.os.Handler;
 import android.os.Message;
+import android.util.Log;
 import ch.ethz.inf.vs.android.aenz.chat.Utils.ChatEventType;
 import ch.ethz.inf.vs.android.aenz.chat.Utils.SyncType;
 
@@ -35,13 +36,15 @@ public class ChatLogic extends ChatEventSource{
 	/**
 	 * Handler for incoming requests.
 	 */
-	private Handler receiveHandler = new Handler() {
-		
+	private Handler receiveHandler = new Handler(new Handler.Callback() {
+
 		@Override
-		public void handleMessage(Message msg) {
-			
+		public boolean handleMessage(Message msg) {
+			ChatEvent e = (ChatEvent) msg.obj;
+			e.dispatchEvent();
+			return true;
 		}
-	};
+	});
 
 	/**
 	 * This object handles the UDP communication between the client and the chat
@@ -74,7 +77,12 @@ public class ChatLogic extends ChatEventSource{
 	 */
 	public ChatLogic(Context context, SyncType sync) {
 		listening = false;
+		comm = new UDPCommunicator();
 		initReceiver();
+	}
+	
+	public void sendRequest(JSONObject request) throws IOException {
+		comm.sendRequest(request);
 	}
 
 	/**
@@ -155,12 +163,17 @@ public class ChatLogic extends ChatEventSource{
 	private void initReceiver() {
 		listening = true;
 		new Thread() {
+			private final String TAG = "Receiver";
+			
 			public void run() {
 				while(listening) {
 					try {
 						JSONObject in = comm.receiveAnswer();
+						Log.d(TAG, "Packet received: " + in.getString("cmd"));
 						ChatEvent e = new ChatEvent(this, parseJSON(in), (in.has("text") ? in.getString("text") : ""), in);
-						e.dispatchEvent();
+						Message msg = Message.obtain();
+						msg.obj = e;
+						receiveHandler.sendMessage(msg);
 					} catch (IOException | JSONException e) {
 						e.printStackTrace();
 					}
