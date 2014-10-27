@@ -1,12 +1,20 @@
 package ch.ethz.inf.vs.android.aenz.chat;
 
+import java.io.IOException;
 import java.util.ArrayList;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import ch.ethz.inf.vs.android.nethz.chat.R;
 import android.app.ListActivity;
+import android.content.Context;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.StrictMode;
+import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
@@ -20,6 +28,8 @@ import android.widget.EditText;
  */
 public class RegisterActivity extends ListActivity implements ChatEventListener{
 	// TODO add more... Look at activity_register.xml
+	private static final String TAG = "RegisterActivity";
+	
 	
 	/**
 	 * The login button
@@ -96,6 +106,7 @@ public class RegisterActivity extends ListActivity implements ChatEventListener{
 				// alert if it fails
 				// Display an alert with appropriate error message if no
 				// connection is available.
+
 			}
 		});
 	}
@@ -106,8 +117,11 @@ public class RegisterActivity extends ListActivity implements ChatEventListener{
 	 * @return boolean indicating if the device is connected to a network interface
 	 */
 	private boolean isNetworkAvailable() {
-		// TODO: Fill me
-		return false;
+		ConnectivityManager connectivityManager 
+			= (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+		
+		NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
+		return activeNetworkInfo != null && activeNetworkInfo.isConnected();
 	}
 
 	/**
@@ -116,7 +130,6 @@ public class RegisterActivity extends ListActivity implements ChatEventListener{
 	 * @return boolean indicating if the device has Internet access
 	 */
 	private boolean isOnline() {
-		// TODO: Fill me
 		return false;
 	}
 

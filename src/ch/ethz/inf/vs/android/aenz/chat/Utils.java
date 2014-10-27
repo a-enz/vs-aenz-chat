@@ -4,6 +4,7 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.HashMap;
 
+import org.json.JSONException;
 import org.json.JSONObject;
 
 /**
@@ -31,15 +32,46 @@ public class Utils {
 	/*
 	 * Change me... Some useful constants
 	 */
-	public final static String SERVER_ADDRESS = "";
-	public final static int SERVER_PORT = -1;
-	public final static int RECEIVE_BUFFER_SIZE = -1;
+	public final static String SERVER_ADDRESS = "129.132.75.194";
+	public final static int SERVER_PORT = 4999;
+	public final static int RECEIVE_BUFFER_SIZE = 4096;
 	public final static int SOCKET_TIMEOUT = -1;
 	public final static int RESPONSE_TIMEOUT = -1;
 	public final static int MESSAGE_TIMEOUT = -1;
 
 	// TODO Fill me with macros for the states
+	
+	public static JSONObject jsonRegister(String nethz, String number) throws JSONException{
+		String str =  "{\"cmd\" : \"register\"," +
+						"\"user\" : \"" + nethz + number + "\"}";
+		return new JSONObject(str);
+	}
 
+	public static JSONObject jsonGetClients() throws JSONException{
+		String str = "{\"cmd\" : \"get_clients\"}";
+		return new JSONObject(str);
+	}
+	
+	public static JSONObject jsonInfo() throws JSONException{
+		String str = "{\"cmd\" : \"info\"}";
+		return new JSONObject(str);
+	}
+	
+	public static JSONObject jsonMessage(String text, String time_vector, String lamport) throws JSONException{
+		String str = "{\"cmd\" : \"message\"," +
+					"\"text\" : \"" + text + "\", " +
+					"\"time_vector\" : " + time_vector + "," +
+					"\"lamport\" : " + lamport + "}";
+		return new JSONObject(str);
+	}
+	
+	public static JSONObject jsonDeregister() throws JSONException{
+		String str = "{\"cmd\" : \"deregister\"}";
+		return new JSONObject(str);
+	}
+	
+	
+	
 	/** This function retrieve the current time and formats it
 	 * @return Time in the appropriate format
 	 */
