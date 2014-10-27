@@ -94,7 +94,21 @@ public class Utils {
 	 *
 	 */
 	public enum ChatEventType {
-		SOME_STATE;
+		REGISTER_SUCCESS,
+		USERNAME_INVALID,
+		NOT_REGISTERED,
+		ALREADY_REGISTERED,
+		USER_JOINED,
+		USER_LEFT,
+		PARTICIPATING_USERS,
+		SERVER_INFO,
+		MSG_SUCCESS,		//your msg was sent successful
+		MSG_FAILURE, 		//your msg did not arrive
+		MSG_BROADCAST,		//broadcast msg arrived
+		DEREGISTER_SUCCESS,
+		DEREGISTER_FAILURE,
+		INVALID_JSON,
+		ERROR				//u fucked up
 	}
 
 	/**

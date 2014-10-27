@@ -68,6 +68,8 @@ public class ChatEventSource {
 		public ChatEventType getType() {
 			return type;
 		}
+		
+		
 		public ChatEvent(Object source, ChatEventType type, String message, JSONObject request) {
 			super(source);
 			this.type = type;
@@ -83,7 +85,7 @@ public class ChatEventSource {
 		public void dispatchEvent() {
 			// TODO Fill me with events to dispatch to the listener
 			switch(this.type) {
-			case SOME_STATE:
+			case MSG_SUCCESS:
 				// TODO Do something...
 				break;
 				
