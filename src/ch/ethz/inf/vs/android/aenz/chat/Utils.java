@@ -113,7 +113,7 @@ public class Utils {
 
 	/**
 	 * This function is used to parse VectorClocks from messages received.
-	 * @param json The JSON received from the server
+	 * @param json The JSON received from the server ("time_vector" or "initial_time_vector" field)
 	 * @return The data in the right format
 	 * @throws JSONException 
 	 */
@@ -121,21 +121,21 @@ public class Utils {
 		// TODO Fill me
 		Log.d(TAG, "vector successfuly extracted. Length: " + json.length());
 		HashMap<Integer, Integer> result = new HashMap<Integer, Integer>();
-		Iterator indexIter = json.keys();
+		Iterator<String> indexIter = json.keys();
 		String index;
 		
 		while(indexIter.hasNext()){
 			
-			index = (String) indexIter.next();
+			index = indexIter.next();
 			
-			//result.put(index, json.getInt(index));
+			result.put(Integer.decode(index), json.getInt(index));
 		}
 		return result;
 	}
 
 	/**
 	 * This function is used to parse the clients from messages received.
-	 * @param json The JSON received from the server
+	 * @param json The JSON received from the server ("client" field)
 	 * @return The data in the right format
 	 * @throws JSONException 
 	 */
@@ -143,8 +143,13 @@ public class Utils {
 		// TODO Fill me
 		HashMap<Integer, String> result = new HashMap<Integer, String>();
 		
-		for (int i = 0; i < json.length(); i++){
-			result.put(i, json.getString(Integer.toString(i)));
+		Iterator<String> indexIter = json.keys();
+		String index;
+		
+		while(indexIter.hasNext()){
+			index = indexIter.next();
+			
+			result.put(Integer.decode(index), json.getString(index));
 		}		
 		return result;
 	}
