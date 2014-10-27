@@ -32,7 +32,8 @@ public class Lamport implements Comparable<Lamport> {
 	 * @param toCompare The newly received Lamport timestamp
 	 */
 	public void update(Lamport toCompare) {
-		// TODO Fill me
+		if (this.value < toCompare.value)
+			this.value = toCompare.value;
 	}
 
 	@Override
@@ -41,8 +42,13 @@ public class Lamport implements Comparable<Lamport> {
 	 * @param toCompare The newly received Lamport timestamp
 	 */
 	public int compareTo(Lamport toCompare) {
-		// TODO Auto-generated method stub
-		return 0;
+		int result = 0;
+		if(this.value < toCompare.value) {
+			result = -1;
+		} else if (this.value > toCompare.value) {
+			result = 1;
+		}
+		return result;
 	}
 
 	@Override
