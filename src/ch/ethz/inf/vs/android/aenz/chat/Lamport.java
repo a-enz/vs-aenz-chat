@@ -52,7 +52,6 @@ public class Lamport implements Comparable<Lamport> {
 	 * @return String representation of Lamport timestamps
 	 */
 	public String toString() {
-		// TODO Fill me
-		return null;
+		return "Lamport: " + Integer.toString(value);
 	}
 }

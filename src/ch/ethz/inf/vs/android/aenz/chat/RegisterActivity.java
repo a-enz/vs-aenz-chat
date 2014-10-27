@@ -2,11 +2,13 @@ package ch.ethz.inf.vs.android.aenz.chat;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import ch.ethz.inf.vs.android.nethz.chat.R;
+
 import android.app.ListActivity;
 import android.content.Context;
 import android.net.ConnectivityManager;
@@ -30,7 +32,7 @@ public class RegisterActivity extends ListActivity implements ChatEventListener{
 	// TODO add more... Look at activity_register.xml
 	private static final String TAG = "RegisterActivity";
 	
-	
+	private UDPCommunicator comm; //for testing purposes only
 	/**
 	 * The login button
 	 */
@@ -95,11 +97,65 @@ public class RegisterActivity extends ListActivity implements ChatEventListener{
 		this.numberText = (EditText) findViewById(R.id.number);
 
 		// TODO: Verify that a connection is available and proceed to register.
+		comm = new UDPCommunicator();
+		
+		comm.setupConnection();
+		
+		if(haveNetworkConnection()){
+			try {
+				comm.sendRequest(Utils.jsonRegister("aenz", "9"));
+				JSONObject response = comm.receiveAnswer();
+				
+				comm.sendRequest(Utils.jsonGetClients());
+				JSONObject clientResp = comm.receiveAnswer();
+				
+				Log.d(TAG, "Clients: " + clientResp.toString());
+				
+				comm.sendRequest(Utils.jsonDeregister());
+				Log.d(TAG, "answer successfuly received" + response.toString());
+				JSONObject vector = response.getJSONObject("init_time_vector");
+				
+				HashMap<Integer, Integer> vMap = Utils.parseVectorClockJSON(vector);
+				VectorClock vClock = new VectorClock(vMap, response.getInt("index"));
+				Log.d(TAG, vClock.toString());
+				
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+				Log.d(TAG, "something with udp connection went wrong");
+			} catch (JSONException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+				Log.d(TAG, "creating json failed");
+			}
+		}
 
 		this.loginButton.setOnClickListener(new OnClickListener() {
 
 			@Override
 			public void onClick(View v) {
+				try {
+					comm.sendRequest(Utils.jsonRegister("aenz", "9"));
+					JSONObject response = comm.receiveAnswer();
+					
+					comm.sendRequest(Utils.jsonDeregister());
+					
+					Log.d(TAG, "answer successfuly received");
+					JSONObject vector = response.getJSONObject("init_time_vector");
+					
+					HashMap<Integer, Integer> vMap = Utils.parseVectorClockJSON(vector);
+					VectorClock vClock = new VectorClock(vMap, response.getInt("index"));
+					Log.d(TAG, vClock.toString());
+					
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+					Log.d(TAG, "something with udp connection went wrong");
+				} catch (JSONException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+					Log.d(TAG, "creating json failed");
+				}
 				// TO DO: if a connection is available proceed to the
 				// registration.
 				// Make sure to check display an appropriate error message in an
@@ -128,9 +184,23 @@ public class RegisterActivity extends ListActivity implements ChatEventListener{
 	 * This function should make sure that there is some connectivity.
 	 * Think about pinging a website...
 	 * @return boolean indicating if the device has Internet access
+	 * @throws IOException 
 	 */
 	private boolean isOnline() {
-		return false;
+		try{
+			comm.sendRequest(Utils.jsonInfo());
+			JSONObject response = comm.receiveAnswer();
+		} catch (JSONException e){
+			e.printStackTrace();
+			Log.d(TAG, "creating json info object failed");
+			return false;
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			Log.d(TAG, "UDPConnection fail in isOnline");
+			return false;
+		}
+		return true;
 	}
 
 	/**

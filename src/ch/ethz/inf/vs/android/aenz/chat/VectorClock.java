@@ -76,7 +76,6 @@ public class VectorClock implements Comparable<VectorClock>{
 	 * @return String that represents tha VectorClock
 	 */
 	public String toString(){
-		// TODO Fill me
-		return null;
+		return "Vector Clock" + clock.toString();
 	}
 }

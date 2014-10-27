@@ -3,9 +3,12 @@ package ch.ethz.inf.vs.android.aenz.chat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.HashMap;
+import java.util.Iterator;
 
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import android.util.Log;
 
 /**
  * This class contains all necessary constants and functions
@@ -14,6 +17,8 @@ import org.json.JSONObject;
  *
  */
 public class Utils {
+	
+	public final static String TAG = "Utils";
 	/**
 	 * Path to the log file
 	 */
@@ -96,11 +101,21 @@ public class Utils {
 	 * This function is used to parse VectorClocks from messages received.
 	 * @param json The JSON received from the server
 	 * @return The data in the right format
+	 * @throws JSONException 
 	 */
-	public static HashMap<Integer, Integer> parseVectorClockJSON(JSONObject json) {
+	public static HashMap<Integer, Integer> parseVectorClockJSON(JSONObject json) throws JSONException {
 		// TODO Fill me
-
+		Log.d(TAG, "vector successfuly extracted. Length: " + json.length());
 		HashMap<Integer, Integer> result = new HashMap<Integer, Integer>();
+		Iterator indexIter = json.keys();
+		String index;
+		
+		while(indexIter.hasNext()){
+			
+			index = (String) indexIter.next();
+			
+			//result.put(index, json.getInt(index));
+		}
 		return result;
 	}
 
@@ -108,11 +123,15 @@ public class Utils {
 	 * This function is used to parse the clients from messages received.
 	 * @param json The JSON received from the server
 	 * @return The data in the right format
+	 * @throws JSONException 
 	 */
-	public static HashMap<Integer, String> parseClientsJSON(JSONObject json) {
+	public static HashMap<Integer, String> parseClientsJSON(JSONObject json) throws JSONException {
 		// TODO Fill me
-
 		HashMap<Integer, String> result = new HashMap<Integer, String>();
+		
+		for (int i = 0; i < json.length(); i++){
+			result.put(i, json.getString(Integer.toString(i)));
+		}		
 		return result;
 	}
 }
