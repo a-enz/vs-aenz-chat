@@ -146,6 +146,7 @@ public class RegisterActivity extends ListActivity implements ChatEventListener{
 						Intent intent = new Intent(getInstance(), MainActivity.class);
 						intent.putExtra("ownNethz", nethz);
 						intent.putExtra("ownUsernameNumber", number);
+						intent.putExtra("ChatLogic", chat);
 						startActivity(intent);
 					} else {
 					//else post error message
