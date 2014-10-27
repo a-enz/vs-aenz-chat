@@ -62,12 +62,14 @@ public class Utils {
 		return new JSONObject(str);
 	}
 	
-	public static JSONObject jsonMessage(String text, String time_vector, String lamport) throws JSONException{
+	public static JSONObject jsonMessage(String text, VectorClock time_vector, Lamport lamport) throws JSONException{
 		String str = "{\"cmd\" : \"message\"," +
 					"\"text\" : \"" + text + "\", " +
-					"\"time_vector\" : " + time_vector + "," +
-					"\"lamport\" : " + lamport + "}";
-		return new JSONObject(str);
+//					"\"time_vector\" : " + time_vector.convertToJSON().toString() + "," +
+					"\"lamport\" : " + lamport.toString() + "}";
+		JSONObject result = new JSONObject(str);
+		result.put("time_vector", time_vector.convertToJSON());
+		return result;
 	}
 	
 	public static JSONObject jsonDeregister() throws JSONException{
