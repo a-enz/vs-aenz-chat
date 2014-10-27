@@ -22,7 +22,13 @@ import ch.ethz.inf.vs.android.aenz.chat.Utils.SyncType;
  * @author hong-an
  *
  */
-public class ChatLogic extends ChatEventSource{
+public class ChatLogic extends ChatEventSource implements Serializable{
+
+
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -2289981761365579252L;
 
 	/**
 	 * Context of the activity
@@ -67,6 +73,10 @@ public class ChatLogic extends ChatEventSource{
 	 */
 	public void initLogger(String username) {
 		this.log = new Logger(username, appContext);
+	}
+	
+	public void close(){
+		
 	}
 
 	/**
@@ -181,5 +191,6 @@ public class ChatLogic extends ChatEventSource{
 			}
 		}.start();
 	}
+	
 
 }

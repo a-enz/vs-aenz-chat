@@ -27,6 +27,9 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+         <activity
+            android:name="ch.ethz.inf.vs.android.aenz.chat.MainActivity" >
+        </activity>
     </application>
 
 </manifest>
