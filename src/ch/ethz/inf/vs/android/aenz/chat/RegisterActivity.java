@@ -1,6 +1,8 @@
 package ch.ethz.inf.vs.android.aenz.chat;
 
 import java.io.IOException;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -9,6 +11,8 @@ import org.json.JSONObject;
 
 import ch.ethz.inf.vs.android.nethz.chat.R;
 
+import android.app.AlertDialog;
+import android.app.Dialog;
 import android.app.ListActivity;
 import android.content.Context;
 import android.net.ConnectivityManager;
@@ -98,63 +102,44 @@ public class RegisterActivity extends ListActivity implements ChatEventListener{
 
 		// TODO: Verify that a connection is available and proceed to register.
 		comm = new UDPCommunicator();
-		
-		comm.setupConnection();
-		
-		if(haveNetworkConnection()){
-			try {
-				comm.sendRequest(Utils.jsonRegister("aenz", "9"));
-				JSONObject response = comm.receiveAnswer();
-				
-				comm.sendRequest(Utils.jsonGetClients());
-				JSONObject clientResp = comm.receiveAnswer();
-				
-				Log.d(TAG, "Clients: " + clientResp.toString());
-				
-				comm.sendRequest(Utils.jsonDeregister());
-				Log.d(TAG, "answer successfuly received" + response.toString());
-				JSONObject vector = response.getJSONObject("init_time_vector");
-				
-				HashMap<Integer, Integer> vMap = Utils.parseVectorClockJSON(vector);
-				VectorClock vClock = new VectorClock(vMap, response.getInt("index"));
-				Log.d(TAG, vClock.toString());
-				
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-				Log.d(TAG, "something with udp connection went wrong");
-			} catch (JSONException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-				Log.d(TAG, "creating json failed");
-			}
-		}
 
 		this.loginButton.setOnClickListener(new OnClickListener() {
 
 			@Override
 			public void onClick(View v) {
-				try {
-					comm.sendRequest(Utils.jsonRegister("aenz", "9"));
-					JSONObject response = comm.receiveAnswer();
+				if(haveNetworkConnection()){
+						
+					try {
+						comm.sendRequest(Utils.jsonRegister("aenz", "9"));
+						JSONObject response = comm.receiveAnswer();
+						comm.sendRequest(Utils.jsonGetClients());
+						JSONObject clientResp = comm.receiveAnswer();
+						
+						comm.sendRequest(Utils.jsonDeregister());
+						
+						Log.d(TAG, "answer successfuly received" + response.toString());
+						JSONObject vector = response.getJSONObject("init_time_vector");
+						
+						Log.d(TAG, "answer successfuly received" + clientResp.toString());
+						JSONObject clientVec = clientResp.getJSONObject("clients");
+						
+						HashMap<Integer, Integer> vMap = Utils.parseVectorClockJSON(vector);
+						HashMap<Integer, String> cMap = Utils.parseClientsJSON(clientVec);
+						VectorClock vClock = new VectorClock(vMap, response.getInt("index"));
+						Log.d(TAG, vClock.toString());
+						Log.d(TAG, cMap.toString());
+						
+					} catch (IOException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+						Log.d(TAG, "something with udp connection went wrong");
+					} catch (JSONException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+						Log.d(TAG, "creating json failed");
+					}
+				} else{
 					
-					comm.sendRequest(Utils.jsonDeregister());
-					
-					Log.d(TAG, "answer successfuly received");
-					JSONObject vector = response.getJSONObject("init_time_vector");
-					
-					HashMap<Integer, Integer> vMap = Utils.parseVectorClockJSON(vector);
-					VectorClock vClock = new VectorClock(vMap, response.getInt("index"));
-					Log.d(TAG, vClock.toString());
-					
-				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-					Log.d(TAG, "something with udp connection went wrong");
-				} catch (JSONException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-					Log.d(TAG, "creating json failed");
 				}
 				// TO DO: if a connection is available proceed to the
 				// registration.
@@ -165,6 +150,10 @@ public class RegisterActivity extends ListActivity implements ChatEventListener{
 
 			}
 		});
+	}
+	
+	private Dialog errorMessage(String text){
+		return null;
 	}
 
 	/**
@@ -187,20 +176,19 @@ public class RegisterActivity extends ListActivity implements ChatEventListener{
 	 * @throws IOException 
 	 */
 	private boolean isOnline() {
-		try{
-			comm.sendRequest(Utils.jsonInfo());
-			JSONObject response = comm.receiveAnswer();
-		} catch (JSONException e){
+		try {
+			boolean available = InetAddress.getByName("8.8.8.8").isReachable(1000);
+			Log.d(TAG, "google dns reachable");
+			return available;
+		} catch (UnknownHostException e) {
+			// TODO Auto-generated catch block
 			e.printStackTrace();
-			Log.d(TAG, "creating json info object failed");
 			return false;
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-			Log.d(TAG, "UDPConnection fail in isOnline");
 			return false;
 		}
-		return true;
 	}
 
 	/**
