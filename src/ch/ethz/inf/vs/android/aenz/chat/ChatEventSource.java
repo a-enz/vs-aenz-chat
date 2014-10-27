@@ -83,14 +83,8 @@ public class ChatEventSource {
 		 * an event listener.
 		 */
 		public void dispatchEvent() {
-			// TODO Fill me with events to dispatch to the listener
-			switch(this.type) {
-			case MSG_SUCCESS:
-				// TODO Do something...
-				break;
-				
-			default:
-				break;
+			for(ChatEventListener listener : eventListenerList) {
+				listener.onReceiveChatEvent(this);
 			}
 		}
 	}

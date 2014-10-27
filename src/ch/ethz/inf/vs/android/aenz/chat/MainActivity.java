@@ -2,6 +2,7 @@ package ch.ethz.inf.vs.android.aenz.chat;
 
 import java.util.ArrayList;
 
+import ch.ethz.inf.vs.android.aenz.chat.ChatEventSource.ChatEvent;
 import ch.ethz.inf.vs.android.nethz.chat.R;
 import android.app.ListActivity;
 import android.os.Bundle;
@@ -46,5 +47,11 @@ public class MainActivity extends ListActivity implements ChatEventListener {
 
 	public void onBackPressed() {
 		// TODO Make sure to deregister when the user presses on Back and to quit the app cleanly.
+	}
+
+	@Override
+	public void onReceiveChatEvent(ChatEvent e) {
+		// TODO Auto-generated method stub
+		
 	}
 }

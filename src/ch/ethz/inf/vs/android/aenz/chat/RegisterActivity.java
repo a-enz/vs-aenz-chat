@@ -7,6 +7,7 @@ import java.util.HashMap;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import ch.ethz.inf.vs.android.aenz.chat.ChatEventSource.ChatEvent;
 import ch.ethz.inf.vs.android.nethz.chat.R;
 
 import android.app.ListActivity;
@@ -97,38 +98,49 @@ public class RegisterActivity extends ListActivity implements ChatEventListener{
 		this.numberText = (EditText) findViewById(R.id.number);
 
 		// TODO: Verify that a connection is available and proceed to register.
-		comm = new UDPCommunicator();
-		
-		comm.setupConnection();
-		
-		if(haveNetworkConnection()){
-			try {
-				comm.sendRequest(Utils.jsonRegister("aenz", "9"));
-				JSONObject response = comm.receiveAnswer();
-				
-				comm.sendRequest(Utils.jsonGetClients());
-				JSONObject clientResp = comm.receiveAnswer();
-				
-				Log.d(TAG, "Clients: " + clientResp.toString());
-				
-				comm.sendRequest(Utils.jsonDeregister());
-				Log.d(TAG, "answer successfuly received" + response.toString());
-				JSONObject vector = response.getJSONObject("init_time_vector");
-				
-				HashMap<Integer, Integer> vMap = Utils.parseVectorClockJSON(vector);
-				VectorClock vClock = new VectorClock(vMap, response.getInt("index"));
-				Log.d(TAG, vClock.toString());
-				
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-				Log.d(TAG, "something with udp connection went wrong");
-			} catch (JSONException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-				Log.d(TAG, "creating json failed");
-			}
+
+		//comm = new UDPCommunicator();
+		chat = new ChatLogic(this, Utils.SyncType.LAMPORT_SYNC);
+		chat.addChatEventListener(this);
+		Log.d(TAG, "ChatLogic initialized");
+		try {
+			chat.sendRequest(Utils.jsonRegister("aenz", "9"));
+		} catch (IOException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		} catch (JSONException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
 		}
+//		if(haveNetworkConnection()){
+//
+//			try {
+//				comm.sendRequest(Utils.jsonRegister("aenz", "9"));
+//				JSONObject response = comm.receiveAnswer();
+//				
+//				comm.sendRequest(Utils.jsonGetClients());
+//				JSONObject clientResp = comm.receiveAnswer();
+//				
+//				Log.d(TAG, "Clients: " + clientResp.toString());
+//				
+//				comm.sendRequest(Utils.jsonDeregister());
+//				Log.d(TAG, "answer successfuly received" + response.toString());
+//				JSONObject vector = response.getJSONObject("init_time_vector");
+//				
+//				HashMap<Integer, Integer> vMap = Utils.parseVectorClockJSON(vector);
+//				VectorClock vClock = new VectorClock(vMap, response.getInt("index"));
+//				Log.d(TAG, vClock.toString());
+//				
+//			} catch (IOException e) {
+//				// TODO Auto-generated catch block
+//				e.printStackTrace();
+//				Log.d(TAG, "something with udp connection went wrong");
+//			} catch (JSONException e) {
+//				// TODO Auto-generated catch block
+//				e.printStackTrace();
+//				Log.d(TAG, "creating json failed");
+//			}
+//		}
 
 		this.loginButton.setOnClickListener(new OnClickListener() {
 
@@ -224,6 +236,7 @@ public class RegisterActivity extends ListActivity implements ChatEventListener{
 	 */
 	public void onBackPressed() {
 		// TODO Make sure to deregister when the user presses on Back and to quit the app cleanly.
+		super.onBackPressed();
 	}
 	@Override
 	/**
@@ -232,5 +245,11 @@ public class RegisterActivity extends ListActivity implements ChatEventListener{
 	 */
 	public Handler getCallbackHandler() {
 		return callbackHandler;
+	}
+
+	@Override
+	public void onReceiveChatEvent(ChatEvent e) {
+		// TODO Auto-generated method stub
+		Log.d(TAG, "Event: " + e.getType().toString());
 	}
 }
