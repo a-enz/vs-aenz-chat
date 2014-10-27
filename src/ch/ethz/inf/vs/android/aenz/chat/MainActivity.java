@@ -53,12 +53,16 @@ public class MainActivity extends ListActivity implements ChatEventListener {
         }
 	}
 	
-	public void sendMessage() throws IOException, JSONException {
-
-		text = ((EditText) findViewById(R.id.text));
-		String text_to_send = text.getText().toString();
-		if(!text_to_send.isEmpty())
-			chat.sendRequest(Utils.jsonMessage(text_to_send, vecClock, lamport));
+	public void sendMessage() {
+		try {
+			text = ((EditText) findViewById(R.id.text));
+			String text_to_send = text.getText().toString();
+			if(!text_to_send.isEmpty())
+				chat.sendRequest(Utils.jsonMessage(text_to_send, vecClock, lamport));
+		} catch (IOException | JSONException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 	
 	@Override
@@ -68,7 +72,12 @@ public class MainActivity extends ListActivity implements ChatEventListener {
 	
 
 	public void onBackPressed() {
-		// TODO Make sure to deregister when the user presses on Back and to quit the app cleanly.
+		try {
+			chat.sendRequest(Utils.jsonDeregister());
+		} catch (IOException | JSONException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 
 	@Override
