@@ -16,6 +16,8 @@ import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.ListActivity;
 import android.content.Context;
+import android.content.DialogInterface;
+import android.content.Intent;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
@@ -26,6 +28,7 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.RadioButton;
 
 /**
  * This activity is launched at the startup of the app.
@@ -57,6 +60,8 @@ public class RegisterActivity extends ListActivity implements ChatEventListener{
 	 * The text field containing the optional digits
 	 */
 	private EditText numberText;
+	
+	private RadioButton stateButton;
 	
 	
 
@@ -113,13 +118,21 @@ public class RegisterActivity extends ListActivity implements ChatEventListener{
 			@Override
 			public void onClick(View v) {
 				if(haveNetworkConnection()){
+					Log.d(TAG, "strange things are going on");
+					String nethz = nethzText.getText().toString();
+					String number = numberText.getText().toString();
+					boolean isRegistered = false;
+					
 					chat = new ChatLogic(getInstance(), Utils.SyncType.LAMPORT_SYNC);
 
 					chat.addChatEventListener(getInstance());
 					Log.d(TAG, "ChatLogic initialized");
 					try {
 						//register as new user
-						chat.sendRequest(Utils.jsonRegister("aenz", "9"));
+						chat.sendRequest(Utils.jsonRegister(nethz, number));
+						
+						//now check if we are registered
+						isRegistered = true;
 					} catch (IOException e1) {
 						// TODO Auto-generated catch block
 						e1.printStackTrace();
@@ -127,8 +140,21 @@ public class RegisterActivity extends ListActivity implements ChatEventListener{
 						// TODO Auto-generated catch block
 						e1.printStackTrace();
 					}
+					
+					//if login successful proceed to MainActivity
+					if(isRegistered){
+						Intent intent = new Intent(getInstance(), MainActivity.class);
+						intent.putExtra("ownNethz", nethz);
+						intent.putExtra("ownUsernameNumber", number);
+						startActivity(intent);
+					} else {
+					//else post error message
+						errorMessage("Registration failed").show();
+					}
+					
+					
 				} else{
-					//error
+					errorMessage("No working Internet Connection").show();
 				}
 				// TO DO: if a connection is available proceed to the
 				// registration.
@@ -142,7 +168,17 @@ public class RegisterActivity extends ListActivity implements ChatEventListener{
 	}
 	
 	private Dialog errorMessage(String text){
-		return null;
+		AlertDialog.Builder builder = new AlertDialog.Builder(this);
+		builder.setTitle("ERROR")
+			.setMessage(text)
+			.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+				
+				@Override
+				public void onClick(DialogInterface dialog, int which) {
+					
+				}
+			});
+		return builder.create();
 	}
 
 	/**
@@ -166,9 +202,9 @@ public class RegisterActivity extends ListActivity implements ChatEventListener{
 	 */
 	private boolean isOnline() {
 		try {
-			boolean available = InetAddress.getByName("8.8.8.8").isReachable(1000);
-			Log.d(TAG, "google dns reachable");
-			return available;
+			boolean available = InetAddress.getByName("8.8.8.8").isReachable(2000);
+			Log.d(TAG, "google dns reachable: " + available);
+			return true; //TODO do this properly
 		} catch (UnknownHostException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
