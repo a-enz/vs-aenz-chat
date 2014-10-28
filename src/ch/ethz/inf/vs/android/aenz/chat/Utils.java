@@ -114,7 +114,8 @@ public class Utils {
 		DEREGISTER_SUCCESS,
 		DEREGISTER_FAILURE,
 		INVALID_JSON,
-		ERROR				//u fucked up
+		ERROR,				//u fucked up
+		WE_SEND				//we send a message
 	}
 
 	/**

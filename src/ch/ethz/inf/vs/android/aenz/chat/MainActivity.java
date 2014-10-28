@@ -6,6 +6,8 @@ import java.util.ArrayList;
 import org.json.JSONException;
 
 import ch.ethz.inf.vs.android.aenz.chat.ChatEventSource.ChatEvent;
+import ch.ethz.inf.vs.android.aenz.chat.Utils.ChatEventType;
+import ch.ethz.inf.vs.android.aenz.chat.Utils.SyncType;
 import ch.ethz.inf.vs.android.nethz.chat.R;
 import android.app.ListActivity;
 import android.os.Bundle;
@@ -18,6 +20,7 @@ import android.widget.ListView;
 public class MainActivity extends ListActivity implements ChatEventListener {
 	private ChatLogic chat;
 	ArrayList<DisplayMessage> displayMessages;
+	SyncType sync;
 	DisplayMessageAdapter adapter;
 	EditText text;
 	String sender;
@@ -53,15 +56,19 @@ public class MainActivity extends ListActivity implements ChatEventListener {
         }
 	}
 	
-	public void sendMessage() {
-		try {
-			text = ((EditText) findViewById(R.id.text));
-			String text_to_send = text.getText().toString();
-			if(!text_to_send.isEmpty())
-				chat.sendRequest(Utils.jsonMessage(text_to_send, vecClock, lamport));
-		} catch (IOException | JSONException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+	public void sendMessage(){
+		text = ((EditText) findViewById(R.id.text));
+		String text_to_send = text.getText().toString();
+		int senderNumber = Integer.parseInt(this.ownUsernameNumber);
+		ChatMessage message = null;
+		if(!text_to_send.isEmpty()) {
+			message = new ChatMessage(Utils.ChatEventType.WE_SEND,senderNumber,text_to_send,lamport,vecClock, 007,sync);
+			try {
+				chat.sendRequest(message.getJSON());
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		}
 	}
 	
@@ -84,7 +91,13 @@ public class MainActivity extends ListActivity implements ChatEventListener {
 	@Override
 	public void onReceiveChatEvent(ChatEvent e) {
 		// TODO : Update the ListView
-		// but where are the messages?
+		if (e.getType() == Utils.ChatEventType.USER_JOINED) {
+			// TODO
+		} else if (e.getType() == Utils.ChatEventType.USER_LEFT) {
+			// TODO
+		} else if (e.getType() == Utils.ChatEventType.MSG_BROADCAST) {
+			// TODO
+		}
 		ListView mListView = (ListView) findViewById(android.R.id.list);
 		mListView.setAdapter(adapter);
 		//

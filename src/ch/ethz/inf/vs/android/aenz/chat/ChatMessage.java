@@ -1,5 +1,6 @@
 package ch.ethz.inf.vs.android.aenz.chat;
 
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import ch.ethz.inf.vs.android.aenz.chat.Utils.ChatEventType;
@@ -75,8 +76,19 @@ public class ChatMessage extends ChatInteraction {
 	 */
 	@Override
 	public void prepareJSON() {
-		// TODO Auto-generated method stub
-
+		try {
+			jsonMap = new JSONObject(this.toString());
+		} catch (JSONException e) {
+			// We fucked up creating a JSONObject
+			e.printStackTrace();
+		}
+	}
+	
+	public JSONObject getJSON() {
+		if (jsonMap == null) {
+			prepareJSON();
+		}
+		return jsonMap;
 	}
 
 }
