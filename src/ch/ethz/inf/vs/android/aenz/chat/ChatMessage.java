@@ -1,5 +1,6 @@
 package ch.ethz.inf.vs.android.aenz.chat;
 
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import ch.ethz.inf.vs.android.aenz.chat.Utils.ChatEventType;
@@ -69,14 +70,49 @@ public class ChatMessage extends ChatInteraction {
 				+ ", \"sender\": " + this.sender + "}";
 
 	}
+	
+	public String getText() {
+		return text;
+	}
+	
+	public int getSender() {
+		return sender;
+	}
+	
+	public long getTimestamp() {
+		return timestamp;
+	}
+	
+	public Lamport getLamportTime() {
+		return lamportTime;
+	}
+	
+	public VectorClock getVectorTime() {
+		return vectorTime;
+	}
+	
+	public SyncType getSyncMethod() {
+		return syncMethod;
+	}
 
 	/**
 	 * This function remaps the object to a JSON object.
 	 */
 	@Override
 	public void prepareJSON() {
-		// TODO Auto-generated method stub
-
+		try {
+			jsonMap = new JSONObject(this.toString());
+		} catch (JSONException e) {
+			// We fucked up creating a JSONObject
+			e.printStackTrace();
+		}
+	}
+	
+	public JSONObject getJSON() {
+		if (jsonMap == null) {
+			prepareJSON();
+		}
+		return jsonMap;
 	}
 
 }

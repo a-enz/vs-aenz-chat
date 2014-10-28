@@ -1,5 +1,6 @@
 package ch.ethz.inf.vs.android.aenz.chat;
 
+import java.io.Serializable;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.HashMap;
@@ -113,7 +114,8 @@ public class Utils {
 		DEREGISTER_SUCCESS,
 		DEREGISTER_FAILURE,
 		INVALID_JSON,
-		ERROR				//u fucked up
+		ERROR,				//u fucked up
+		WE_SEND				//we send a message
 	}
 
 	/**
@@ -146,15 +148,17 @@ public class Utils {
 	 */
 	public static HashMap<Integer, String> parseClientsJSON(JSONObject json) throws JSONException {
 		// TODO Fill me
+		JSONObject clients = json.getJSONObject("clients");
+		
 		HashMap<Integer, String> result = new HashMap<Integer, String>();
 		
-		Iterator<String> indexIter = json.keys();
+		Iterator<String> indexIter = clients.keys();
 		String index;
 		
 		while(indexIter.hasNext()){
 			index = indexIter.next();
 			
-			result.put(Integer.decode(index), json.getString(index));
+			result.put(Integer.decode(index), clients.getString(index));
 		}		
 		return result;
 	}
