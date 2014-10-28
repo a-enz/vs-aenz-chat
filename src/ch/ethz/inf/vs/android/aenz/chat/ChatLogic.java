@@ -61,6 +61,8 @@ public class ChatLogic extends ChatEventSource implements Serializable{
 	 */
 	UDPCommunicator comm;
 	
+	private SyncType sync;
+	
 	/**
 	 * This object should be used to log 
 	 * deliverable messages.
@@ -89,6 +91,10 @@ public class ChatLogic extends ChatEventSource implements Serializable{
 		return (singleton == null ? (singleton = new ChatLogic(context, sync)) : singleton);
 	}
 	
+	public void setSyncType(SyncType sync){
+		this.sync = sync;
+	}
+	
 	public void close() {
 		listening = false;
 		comm.close();
@@ -102,6 +108,7 @@ public class ChatLogic extends ChatEventSource implements Serializable{
 	private ChatLogic(Context context, SyncType sync) {
 		listening = false;
 		comm = new UDPCommunicator();
+		this.sync = sync;
 		initReceiver();
 	}
 	
@@ -214,7 +221,7 @@ public class ChatLogic extends ChatEventSource implements Serializable{
 															lamport, 
 															vector, 
 															System.currentTimeMillis(), 
-															Utils.SyncType.LAMPORT_SYNC);
+															sync);
 						} else chatMessage = null;
 						
 						ChatEvent e = new ChatEvent(this, chatState, (in.has("text") ? in.getString("text") : ""), in, chatMessage);

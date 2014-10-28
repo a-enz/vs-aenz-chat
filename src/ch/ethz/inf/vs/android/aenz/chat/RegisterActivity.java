@@ -115,7 +115,9 @@ public class RegisterActivity extends ListActivity implements ChatEventListener{
 		this.stateSelect = (RadioGroup) findViewById(R.id.radioGroup);
 		// TODO: Verify that a connection is available and proceed to register.
 
-
+		//TODO is this okay? not really i think
+		chat = ChatLogic.getInstance(this, null);
+		chat.addChatEventListener(this);
 		
 		this.loginButton.setOnClickListener(new OnClickListener() {
 
@@ -130,19 +132,17 @@ public class RegisterActivity extends ListActivity implements ChatEventListener{
 					//create ChatLogic in correct mode
 					if(stateSelect.getCheckedRadioButtonId() == R.id.lamportRadio){
 						sync = Utils.SyncType.LAMPORT_SYNC;
-						chat = ChatLogic.getInstance(getInstance(), sync);
 						Log.d(TAG, "ChatLogic initialized with LAMPORT");
 					} else {
 						sync = Utils.SyncType.VECTOR_CLOCK_SYNC;
-						chat = ChatLogic.getInstance(getInstance(), sync);
 						Log.d(TAG, "ChatLogic initialized with VECTOR CLOCK");
 					}
-
-					//add this to receive chatevents
-					chat.addChatEventListener(getInstance());
+					
+					chat.setSyncType(sync);
 					
 					try {
 						//register as new user
+						Log.d(TAG, "Trying to register as: " +nethz + number);
 						chat.sendRequest(Utils.jsonRegister(nethz, number));
 						
 					} catch (IOException e1) {
@@ -294,6 +294,7 @@ public class RegisterActivity extends ListActivity implements ChatEventListener{
 				errorMessage("You may not be on ETH subnet or trying to " +
 						"register with an invalid username").show();
 				break;
+			case NOT_REGISTERED:
 			case ALREADY_REGISTERED:
 				Intent intent2 = new Intent(getInstance(), MainActivity.class);
 				intent2.putExtra("ownNethz", nethz);
@@ -304,15 +305,6 @@ public class RegisterActivity extends ListActivity implements ChatEventListener{
 			default:
 			break;
 		}
-		//do something when getting a register "success" event
-		
-		//...register "failure" both cases
-		
-		//...register "failure" already registered
-		
-		//...get clients
-
-		
 	}
 	
 	private RegisterActivity getInstance(){
