@@ -2,6 +2,7 @@ package ch.ethz.inf.vs.android.aenz.chat;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 import org.json.JSONException;
 
@@ -34,6 +35,7 @@ public class MainActivity extends ListActivity implements ChatEventListener {
 	
 	VectorClock vecClock;
 	Lamport lamport;
+	HashMap<Integer,String> userList;
 	
 	final Handler callbackHandler = new Handler();
 	
@@ -55,6 +57,25 @@ public class MainActivity extends ListActivity implements ChatEventListener {
         	chat = ChatLogic.getInstance(this, null); //sync should be declared already so it doesn't matter
         }
 	}
+	
+	public void fetchTheUserList() {
+		try {
+			chat.sendRequest(Utils.jsonGetClients());
+		} catch (IOException | JSONException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}		
+	}
+	
+	public String whoIs(int identifier) {
+		String name = userList.get(identifier);
+		if (name == null || name.isEmpty()) {
+			fetchTheUserList();
+			name = Integer.toString(identifier);
+		}
+		return name;
+	}
+	
 	
 	public void sendMessage(){
 		text = ((EditText) findViewById(R.id.text));
@@ -95,11 +116,29 @@ public class MainActivity extends ListActivity implements ChatEventListener {
 			// TODO
 		} else if (e.getType() == Utils.ChatEventType.USER_LEFT) {
 			// TODO
+		} else if (e.getType() == Utils.ChatEventType.PARTICIPATING_USERS) {
+			try {
+				userList = Utils.parseClientsJSON(e.request);
+			} catch (JSONException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
 		} else if (e.getType() == Utils.ChatEventType.MSG_BROADCAST) {
-			// TODO
+			boolean me = false;
+			String text = e.chatMessage.getText();
+			int identifier = e.chatMessage.getSender();
+			String name;
+			if (identifier == Integer.parseInt(ownUsernameNumber)){
+				me = true;
+				name = ownUsername; // Is thios correct or should it just be the nethz?
+			} else {
+				name = whoIs(identifier);
+			}
+			DisplayMessage displ = new DisplayMessage(text, name, me);
+			adapter.add(displ);
+			
+			ListView mListView = (ListView) findViewById(android.R.id.list);
+			mListView.setAdapter(adapter);
 		}
-		ListView mListView = (ListView) findViewById(android.R.id.list);
-		mListView.setAdapter(adapter);
-		//
 	}
 }

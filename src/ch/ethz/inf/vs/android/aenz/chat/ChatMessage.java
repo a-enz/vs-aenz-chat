@@ -70,6 +70,30 @@ public class ChatMessage extends ChatInteraction {
 				+ ", \"sender\": " + this.sender + "}";
 
 	}
+	
+	public String getText() {
+		return text;
+	}
+	
+	public int getSender() {
+		return sender;
+	}
+	
+	public long getTimestamp() {
+		return timestamp;
+	}
+	
+	public Lamport getLamportTime() {
+		return lamportTime;
+	}
+	
+	public VectorClock getVectorTime() {
+		return vectorTime;
+	}
+	
+	public SyncType getSyncMethod() {
+		return syncMethod;
+	}
 
 	/**
 	 * This function remaps the object to a JSON object.
