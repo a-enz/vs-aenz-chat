@@ -2,6 +2,7 @@ package ch.ethz.inf.vs.android.aenz.chat;
 
 import java.io.IOException;
 import java.io.Serializable;
+import java.util.HashMap;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -198,7 +199,28 @@ public class ChatLogic extends ChatEventSource implements Serializable{
 					try {
 						JSONObject in = comm.receiveAnswer();
 						Log.d(TAG, "Packet received: " + in.getString("cmd"));
-						ChatEvent e = new ChatEvent(this, parseJSON(in), (in.has("text") ? in.getString("text") : ""), in);
+						
+						//creating a chatmessage
+						ChatMessage chatMessage;
+						ChatEventType chatState = parseJSON(in);
+						if(chatState == Utils.ChatEventType.MSG_BROADCAST){
+							//fill chat message
+							int sender = in.getInt("sender");
+							String text = in.getString("text");
+							Lamport lamport = new Lamport(in.getInt("lamport"));
+							HashMap<Integer,Integer> vectorValues = Utils.parseVectorClockJSON(in.getJSONObject("time_vector"));
+							VectorClock vector = new VectorClock(vectorValues, sender); //set the index of this vectorclock to sender ID
+							
+							chatMessage = new ChatMessage(chatState, //broadcast only
+															sender, 
+															text, 
+															lamport, 
+															vector, 
+															System.currentTimeMillis(), 
+															Utils.SyncType.LAMPORT_SYNC);
+						} else chatMessage = null;
+						
+						ChatEvent e = new ChatEvent(this, chatState, (in.has("text") ? in.getString("text") : ""), in, chatMessage);
 						Message msg = Message.obtain();
 						msg.obj = e;
 						receiveHandler.sendMessage(msg);
