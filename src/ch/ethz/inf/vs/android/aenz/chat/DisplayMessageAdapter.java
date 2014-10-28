@@ -110,6 +110,10 @@ public class DisplayMessageAdapter extends BaseAdapter {
 	private static class ViewHolder {
 		TextView message;
 	}
+	
+	public void add(DisplayMessage displ) {
+		mDisplayMessages.add(displ);
+	}
 
 	@Override
 	/**
