@@ -10,6 +10,7 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.os.Handler;
 import android.os.Message;
+import android.os.Parcelable;
 import android.util.Log;
 import ch.ethz.inf.vs.android.aenz.chat.Utils.ChatEventType;
 import ch.ethz.inf.vs.android.aenz.chat.Utils.SyncType;

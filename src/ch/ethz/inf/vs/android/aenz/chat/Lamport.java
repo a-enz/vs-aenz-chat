@@ -32,7 +32,7 @@ public class Lamport implements Comparable<Lamport> {
 	 * @param toCompare The newly received Lamport timestamp
 	 */
 	public void update(Lamport toCompare) {
-		if (this.value < toCompare.value)
+		if (this.compareTo(toCompare) < 0)
 			this.value = toCompare.value;
 	}
 

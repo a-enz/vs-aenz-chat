@@ -1,6 +1,9 @@
 package ch.ethz.inf.vs.android.aenz.chat;
 
+import java.io.IOException;
 import java.util.ArrayList;
+
+import org.json.JSONException;
 
 import ch.ethz.inf.vs.android.aenz.chat.ChatEventSource.ChatEvent;
 import ch.ethz.inf.vs.android.nethz.chat.R;
@@ -10,6 +13,7 @@ import android.os.Handler;
 import android.os.StrictMode;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ListView;
 
 public class MainActivity extends ListActivity implements ChatEventListener {
 	private ChatLogic chat;
@@ -25,6 +29,9 @@ public class MainActivity extends ListActivity implements ChatEventListener {
 	EditText nethzText;
 	EditText numberText;
 	
+	VectorClock vecClock;
+	Lamport lamport;
+	
 	final Handler callbackHandler = new Handler();
 	
 	@Override
@@ -35,8 +42,27 @@ public class MainActivity extends ListActivity implements ChatEventListener {
 		StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
         StrictMode.setThreadPolicy(policy);
 
-		//Retrieve ChatLogic object from ConnectionActivity
-		this.chat = (ChatLogic) getIntent().getSerializableExtra("ChatLogic");
+        Bundle extras = getIntent().getExtras();
+        if (extras == null){
+        	//oh boy fucked up
+        } else {
+        	this.ownNethz = extras.getString(ownNethz);
+        	this.ownUsernameNumber = extras.getString(ownUsernameNumber);
+        	//Retrieve ChatLogic object from ConnectionActivity
+        	this.chat = (ChatLogic) getIntent().getSerializableExtra("ChatLogic");
+        }
+	}
+	
+	public void sendMessage() {
+		try {
+			text = ((EditText) findViewById(R.id.text));
+			String text_to_send = text.getText().toString();
+			if(!text_to_send.isEmpty())
+				chat.sendRequest(Utils.jsonMessage(text_to_send, vecClock, lamport));
+		} catch (IOException | JSONException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 	
 	@Override
@@ -46,12 +72,20 @@ public class MainActivity extends ListActivity implements ChatEventListener {
 	
 
 	public void onBackPressed() {
-		// TODO Make sure to deregister when the user presses on Back and to quit the app cleanly.
+		try {
+			chat.sendRequest(Utils.jsonDeregister());
+		} catch (IOException | JSONException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 
 	@Override
 	public void onReceiveChatEvent(ChatEvent e) {
-		// TODO Auto-generated method stub
-		
+		// TODO : Update the ListView
+		// but where are the messages?
+		ListView mListView = (ListView) findViewById(android.R.id.list);
+		mListView.setAdapter(adapter);
+		//
 	}
 }

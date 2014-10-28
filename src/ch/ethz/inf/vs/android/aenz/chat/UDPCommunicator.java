@@ -1,6 +1,7 @@
 package ch.ethz.inf.vs.android.aenz.chat;
 
 import java.io.IOException;
+import java.io.Serializable;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
@@ -20,7 +21,7 @@ import android.util.Log;
  *
  */
 
-public class UDPCommunicator {
+public class UDPCommunicator implements Serializable {
 	// TODO: Add the necessary objects
 	private static final String TAG = "UDPCommunicator";
 	
