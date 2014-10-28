@@ -87,7 +87,7 @@ public class ChatLogic extends ChatEventSource implements Serializable{
 		return (singleton == null ? (singleton = new ChatLogic(context, sync)) : singleton);
 	}
 	
-	public void close(){
+	public void close() {
 		listening = false;
 		comm.close();
 	}
@@ -105,6 +105,7 @@ public class ChatLogic extends ChatEventSource implements Serializable{
 	
 	//TODO
 	public void sendRequest(JSONObject request) throws IOException {
+		//log.logReadyMsg(msg, isIncoming)
 		comm.sendRequest(request);
 	}
 
