@@ -277,6 +277,8 @@ public class RegisterActivity extends ListActivity implements ChatEventListener{
 			} catch (JSONException e1) {
 				// TODO Auto-generated catch block
 				e1.printStackTrace();
+				errorMessage("Extracting initial TimeVector failed").show();
+				break;
 			}
 				
 				Intent intent = new Intent(getInstance(), MainActivity.class);
