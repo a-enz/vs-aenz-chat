@@ -1,11 +1,13 @@
 package ch.ethz.inf.vs.android.aenz.chat;
 
+import java.io.Serializable;
+
 /**
  * This class should be used for abstracting Lamport timestamps
  * @author hong-an
  *
  */
-public class Lamport implements Comparable<Lamport> {
+public class Lamport implements Comparable<Lamport>, Serializable {
 	/**
 	 * The timestamp
 	 */
