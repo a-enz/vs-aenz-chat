@@ -123,8 +123,7 @@ public class RegisterActivity extends ListActivity implements ChatEventListener{
 					String number = numberText.getText().toString();
 					boolean isRegistered = false;
 					
-					chat = new ChatLogic(getInstance(), Utils.SyncType.LAMPORT_SYNC);
-
+					chat = ChatLogic.getInstance(getInstance(), Utils.SyncType.LAMPORT_SYNC);
 					chat.addChatEventListener(getInstance());
 					Log.d(TAG, "ChatLogic initialized");
 					try {

@@ -23,6 +23,9 @@ public class Utils {
 	 * Path to the log file
 	 */
 	public final static String LOG_PATH = "chat_log.txt";
+	
+	//private static final ChatLogic chatLogic = new 
+	
 
 	/**
 	 * Useful for differentiating between selecting

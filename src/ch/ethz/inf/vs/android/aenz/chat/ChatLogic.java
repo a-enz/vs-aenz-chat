@@ -24,7 +24,7 @@ import ch.ethz.inf.vs.android.aenz.chat.Utils.SyncType;
  */
 public class ChatLogic extends ChatEventSource implements Serializable{
 
-
+	
 	/**
 	 * 
 	 */
@@ -52,6 +52,7 @@ public class ChatLogic extends ChatEventSource implements Serializable{
 		}
 	});
 
+	private static ChatLogic singleton;
 	/**
 	 * This object handles the UDP communication between the client and the chat
 	 * server
@@ -75,22 +76,34 @@ public class ChatLogic extends ChatEventSource implements Serializable{
 		this.log = new Logger(username, appContext);
 	}
 	
+	/**
+	 * returns the ChatLogic singleton
+	 * if the chatlogic has already been createt, the parameter will have no effect
+	 * @param context
+	 * @param sync
+	 * @return
+	 */
+	public static ChatLogic getInstance(Context context, SyncType sync) {
+		return (singleton == null ? (singleton = new ChatLogic(context, sync)) : singleton);
+	}
+	
 	public void close(){
-		
+		listening = false;
+		comm.close();
 	}
 
 	/**
 	 * Constructor
-	 * Use only after Internet connection has been setup
 	 * @param context Context of the Activity
 	 * @param sync Indicates whether Lamport timestamps or Vector clocks should be used
 	 */
-	public ChatLogic(Context context, SyncType sync) {
+	private ChatLogic(Context context, SyncType sync) {
 		listening = false;
 		comm = new UDPCommunicator();
 		initReceiver();
 	}
 	
+	//TODO
 	public void sendRequest(JSONObject request) throws IOException {
 		comm.sendRequest(request);
 	}

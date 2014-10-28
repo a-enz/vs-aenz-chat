@@ -84,4 +84,8 @@ public class UDPCommunicator {
 		}
 		return jsonResponse;
 	}
+	
+	public void close() {
+		udpSocket.close();
+	}
 }
