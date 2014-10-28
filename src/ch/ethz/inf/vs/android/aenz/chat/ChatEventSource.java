@@ -61,6 +61,8 @@ public class ChatEventSource {
 		 */
 		protected ChatEventType type;
 		
+		public ChatMessage chatMessage;
+		
 		/**
 		 * Getter for the event type
 		 * @return
@@ -70,11 +72,12 @@ public class ChatEventSource {
 		}
 		
 		
-		public ChatEvent(Object source, ChatEventType type, String message, JSONObject request) {
+		public ChatEvent(Object source, ChatEventType type, String message, JSONObject request, ChatMessage chatMessage) {
 			super(source);
 			this.type = type;
 			this.message = message;
 			this.request = request;
+			this.chatMessage = chatMessage;
 		}
 		
 		/**
