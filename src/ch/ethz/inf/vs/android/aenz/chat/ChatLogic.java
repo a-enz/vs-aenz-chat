@@ -185,6 +185,10 @@ public class ChatLogic extends ChatEventSource implements Serializable{
 
 	}
 	
+	private ChatInteraction generateChatInteraction(ChatEventType type, JSONObject json) {
+		return null;
+	}
+	
 	private void initReceiver() {
 		listening = true;
 		new Thread() {
