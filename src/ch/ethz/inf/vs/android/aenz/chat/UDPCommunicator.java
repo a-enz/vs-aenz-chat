@@ -85,4 +85,8 @@ public class UDPCommunicator implements Serializable {
 		}
 		return jsonResponse;
 	}
+	
+	public void close() {
+		udpSocket.close();
+	}
 }

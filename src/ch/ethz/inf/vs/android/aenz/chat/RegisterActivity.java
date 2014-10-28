@@ -109,36 +109,35 @@ public class RegisterActivity extends ListActivity implements ChatEventListener{
 		this.stateSelect = (RadioGroup) findViewById(R.id.radioGroup);
 		// TODO: Verify that a connection is available and proceed to register.
 
-	
 
-					
-		
 		
 		this.loginButton.setOnClickListener(new OnClickListener() {
 
 			@Override
 			public void onClick(View v) {
-				if(haveNetworkConnection()){
+				if(haveNetworkConnection()){ //check network connectivity
+					
+					//read login data from UI
 					String nethz = nethzText.getText().toString();
 					String number = numberText.getText().toString();
-					boolean isRegistered = false;
-					
-					
+	
+					//create ChatLogic in correct mode
 					if(stateSelect.getCheckedRadioButtonId() == R.id.lamportRadio){
-						chat = new ChatLogic(getInstance(), Utils.SyncType.LAMPORT_SYNC);
+						chat = ChatLogic.getInstance(getInstance(), Utils.SyncType.LAMPORT_SYNC);
 						Log.d(TAG, "ChatLogic initialized with LAMPORT");
 					} else {
-						chat = new ChatLogic(getInstance(), Utils.SyncType.VECTOR_CLOCK_SYNC);
+						chat = ChatLogic.getInstance(getInstance(), Utils.SyncType.VECTOR_CLOCK_SYNC);
 						Log.d(TAG, "ChatLogic initialized with VECTOR CLOCK");
 					}
 
+					//add this to receive chatevents
 					chat.addChatEventListener(getInstance());
+					
 					try {
 						//register as new user
 						chat.sendRequest(Utils.jsonRegister(nethz, number));
 						
-						//now check if we are registered
-						isRegistered = true;
+						//TODO now check if we are registered
 					} catch (IOException e1) {
 						// TODO Auto-generated catch block
 						e1.printStackTrace();
@@ -148,12 +147,12 @@ public class RegisterActivity extends ListActivity implements ChatEventListener{
 					}
 					
 					//if login successful proceed to MainActivity
-					if(isRegistered){
+					if(true){//TODO correct handling with response message
 						Intent intent = new Intent(getInstance(), MainActivity.class);
 						intent.putExtra("ownNethz", nethz);
 						intent.putExtra("ownUsernameNumber", number);
 						//intent.putExtra("ChatLogic", chat);
-						//startActivity(intent);
+						startActivity(intent);
 					} else {
 					//else post error message
 						errorMessage("Registration failed").show();
