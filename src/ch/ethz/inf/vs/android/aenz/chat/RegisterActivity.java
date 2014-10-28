@@ -29,6 +29,7 @@ import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.RadioButton;
+import android.widget.RadioGroup;
 
 /**
  * This activity is launched at the startup of the app.
@@ -61,7 +62,7 @@ public class RegisterActivity extends ListActivity implements ChatEventListener{
 	 */
 	private EditText numberText;
 	
-	private RadioButton stateButton;
+	private RadioGroup stateSelect;
 	
 	
 
@@ -105,33 +106,38 @@ public class RegisterActivity extends ListActivity implements ChatEventListener{
 		this.loginButton = (Button) findViewById(R.id.login);
 		this.nethzText = (EditText) findViewById(R.id.username);
 		this.numberText = (EditText) findViewById(R.id.number);
-
+		this.stateSelect = (RadioGroup) findViewById(R.id.radioGroup);
 		// TODO: Verify that a connection is available and proceed to register.
 
-	
 
-					
-		
 		
 		this.loginButton.setOnClickListener(new OnClickListener() {
 
 			@Override
 			public void onClick(View v) {
-				if(haveNetworkConnection()){
-					Log.d(TAG, "strange things are going on");
+				if(haveNetworkConnection()){ //check network connectivity
+					
+					//read login data from UI
 					String nethz = nethzText.getText().toString();
 					String number = numberText.getText().toString();
-					boolean isRegistered = false;
-					
-					chat = ChatLogic.getInstance(getInstance(), Utils.SyncType.LAMPORT_SYNC);
+	
+					//create ChatLogic in correct mode
+					if(stateSelect.getCheckedRadioButtonId() == R.id.lamportRadio){
+						chat = ChatLogic.getInstance(getInstance(), Utils.SyncType.LAMPORT_SYNC);
+						Log.d(TAG, "ChatLogic initialized with LAMPORT");
+					} else {
+						chat = ChatLogic.getInstance(getInstance(), Utils.SyncType.VECTOR_CLOCK_SYNC);
+						Log.d(TAG, "ChatLogic initialized with VECTOR CLOCK");
+					}
+
+					//add this to receive chatevents
 					chat.addChatEventListener(getInstance());
-					Log.d(TAG, "ChatLogic initialized");
+					
 					try {
 						//register as new user
 						chat.sendRequest(Utils.jsonRegister(nethz, number));
 						
-						//now check if we are registered
-						isRegistered = true;
+						//TODO now check if we are registered
 					} catch (IOException e1) {
 						// TODO Auto-generated catch block
 						e1.printStackTrace();
@@ -141,10 +147,11 @@ public class RegisterActivity extends ListActivity implements ChatEventListener{
 					}
 					
 					//if login successful proceed to MainActivity
-					if(isRegistered){
+					if(true){//TODO correct handling with response message
 						Intent intent = new Intent(getInstance(), MainActivity.class);
 						intent.putExtra("ownNethz", nethz);
 						intent.putExtra("ownUsernameNumber", number);
+						//intent.putExtra("ChatLogic", chat);
 						startActivity(intent);
 					} else {
 					//else post error message
@@ -201,7 +208,7 @@ public class RegisterActivity extends ListActivity implements ChatEventListener{
 	 */
 	private boolean isOnline() {
 		try {
-			boolean available = InetAddress.getByName("8.8.8.8").isReachable(2000);
+			boolean available = InetAddress.getByName("www.ethz.ch").isReachable(1000);
 			Log.d(TAG, "google dns reachable: " + available);
 			return true; //TODO do this properly
 		} catch (UnknownHostException e) {
@@ -251,6 +258,16 @@ public class RegisterActivity extends ListActivity implements ChatEventListener{
 	public void onReceiveChatEvent(ChatEvent e) {
 		// TODO Auto-generated method stub
 		Log.d(TAG, "Event: " + e.getType().toString());
+		
+		//do something when getting a register "success" event
+		
+		//...register "failure" both cases
+		
+		//...register "failure" already registered
+		
+		//...get clients
+		
+		
 	}
 	
 	private RegisterActivity getInstance(){
