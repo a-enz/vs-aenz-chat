@@ -69,6 +69,10 @@ public class ChatEventSource {
 			return type;
 		}
 		
+		/**
+		 *  The chatMessage (it is only invoked if it is truly a message else it should be NULL)
+		 */
+		public ChatMessage chatMessage;
 		
 		public ChatEvent(Object source, ChatEventType type, String message, JSONObject request) {
 			super(source);

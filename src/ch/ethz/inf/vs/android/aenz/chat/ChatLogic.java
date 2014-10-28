@@ -118,6 +118,9 @@ public class ChatLogic extends ChatEventSource implements Serializable{
 	 * @throws JSONException
 	 */
 	public ChatEventType parseJSON(JSONObject jsonMap){
+		// TODO : PLEAS GIF CHATMESSAGE
+		// set it null if it is an error or a notification etc
+		
 		String cmd;
 		try {
 			cmd = jsonMap.getString("cmd");
