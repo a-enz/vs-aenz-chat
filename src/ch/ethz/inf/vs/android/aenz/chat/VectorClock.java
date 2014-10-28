@@ -1,5 +1,6 @@
 package ch.ethz.inf.vs.android.aenz.chat;
 
+import java.io.Serializable;
 import java.util.HashMap;
 
 import org.json.JSONObject;
@@ -10,7 +11,7 @@ import org.json.JSONObject;
  * @author hong-an
  *
  */
-public class VectorClock implements Comparable<VectorClock>{
+public class VectorClock implements Comparable<VectorClock>, Serializable{
 	/**
 	 * This should contain the vector clock
 	 */

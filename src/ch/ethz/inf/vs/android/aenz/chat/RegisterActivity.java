@@ -10,6 +10,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import ch.ethz.inf.vs.android.aenz.chat.ChatEventSource.ChatEvent;
+import ch.ethz.inf.vs.android.aenz.chat.Utils.SyncType;
 import ch.ethz.inf.vs.android.nethz.chat.R;
 
 import android.app.AlertDialog;
@@ -83,7 +84,12 @@ public class RegisterActivity extends ListActivity implements ChatEventListener{
 	 */
 	DisplayMessageAdapter adapter;
 	
-	
+	/**
+	 * Things needed for the register message
+	 */
+	private String nethz;
+	private String number;
+	private SyncType sync;
 	
 	/**
 	 * This handles the callbacks between the chatLogic and 
@@ -118,15 +124,17 @@ public class RegisterActivity extends ListActivity implements ChatEventListener{
 				if(haveNetworkConnection()){ //check network connectivity
 					
 					//read login data from UI
-					String nethz = nethzText.getText().toString();
-					String number = numberText.getText().toString();
+					nethz = nethzText.getText().toString();
+					number = numberText.getText().toString();
 	
 					//create ChatLogic in correct mode
 					if(stateSelect.getCheckedRadioButtonId() == R.id.lamportRadio){
-						chat = ChatLogic.getInstance(getInstance(), Utils.SyncType.LAMPORT_SYNC);
+						sync = Utils.SyncType.LAMPORT_SYNC;
+						chat = ChatLogic.getInstance(getInstance(), sync);
 						Log.d(TAG, "ChatLogic initialized with LAMPORT");
 					} else {
-						chat = ChatLogic.getInstance(getInstance(), Utils.SyncType.VECTOR_CLOCK_SYNC);
+						sync = Utils.SyncType.VECTOR_CLOCK_SYNC;
+						chat = ChatLogic.getInstance(getInstance(), sync);
 						Log.d(TAG, "ChatLogic initialized with VECTOR CLOCK");
 					}
 
@@ -137,27 +145,11 @@ public class RegisterActivity extends ListActivity implements ChatEventListener{
 						//register as new user
 						chat.sendRequest(Utils.jsonRegister(nethz, number));
 						
-						//TODO now check if we are registered
 					} catch (IOException e1) {
-						// TODO Auto-generated catch block
 						e1.printStackTrace();
 					} catch (JSONException e1) {
-						// TODO Auto-generated catch block
 						e1.printStackTrace();
 					}
-					
-					//if login successful proceed to MainActivity
-					if(true){//TODO correct handling with response message
-						Intent intent = new Intent(getInstance(), MainActivity.class);
-						intent.putExtra("ownNethz", nethz);
-						intent.putExtra("ownUsernameNumber", number);
-						//intent.putExtra("ChatLogic", chat);
-						startActivity(intent);
-					} else {
-					//else post error message
-						errorMessage("Registration failed").show();
-					}
-					
 					
 				} else{
 					errorMessage("No working Internet Connection").show();
@@ -208,15 +200,14 @@ public class RegisterActivity extends ListActivity implements ChatEventListener{
 	 */
 	private boolean isOnline() {
 		try {
-			boolean available = InetAddress.getByName("www.ethz.ch").isReachable(1000);
+			Log.d(TAG, "trying to contact server: ");
+			boolean available = InetAddress.getByName("8.8.8.8").isReachable(1000);
 			Log.d(TAG, "google dns reachable: " + available);
 			return true; //TODO do this properly
 		} catch (UnknownHostException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 			return false;
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 			return false;
 		}
@@ -244,6 +235,15 @@ public class RegisterActivity extends ListActivity implements ChatEventListener{
 	public void onBackPressed() {
 		// TODO Make sure to deregister when the user presses on Back and to quit the app cleanly.
 		super.onBackPressed();
+		try{
+			chat.sendRequest(Utils.jsonDeregister());
+		} catch (JSONException e){
+			e.printStackTrace();
+			Log.d(TAG, "JSON: deregistering failed");
+		} catch (IOException e) {
+			e.printStackTrace();
+			Log.d(TAG, "IO: deregistering failed");
+		}
 	}
 	@Override
 	/**
@@ -256,9 +256,52 @@ public class RegisterActivity extends ListActivity implements ChatEventListener{
 
 	@Override
 	public void onReceiveChatEvent(ChatEvent e) {
-		// TODO Auto-generated method stub
 		Log.d(TAG, "Event: " + e.getType().toString());
 		
+		switch(e.getType()){
+			case REGISTER_SUCCESS: 
+				//initialize lamport and vector
+				JSONObject response = e.request;
+				Lamport lamport = null;
+				VectorClock vClock = null;
+				
+			try {
+				//extract and create initial lamport
+				lamport = new Lamport(response.getInt("init_lamport"));
+				
+				//extract and create initial vector clock
+				HashMap<Integer, Integer> initVectorClock = Utils.parseVectorClockJSON(response.getJSONObject("init_time_vector"));
+				int index = Integer.parseInt(response.getString("index"));
+				vClock = new VectorClock(initVectorClock, index);
+				
+			} catch (JSONException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
+				
+				Intent intent = new Intent(getInstance(), MainActivity.class);
+				intent.putExtra("ownNethz", nethz);
+				intent.putExtra("ownUsernameNumber", number);
+				intent.putExtra("sync", sync);
+				intent.putExtra("vecClock", vClock);
+				intent.putExtra("lamport", lamport);
+				startActivity(intent);
+				
+				break;
+			case USERNAME_INVALID:
+				errorMessage("You may not be on ETH subnet or trying to " +
+						"register with an invalid username").show();
+				break;
+			case ALREADY_REGISTERED:
+				Intent intent2 = new Intent(getInstance(), MainActivity.class);
+				intent2.putExtra("ownNethz", nethz);
+				intent2.putExtra("ownUsernameNumber", number);
+				intent2.putExtra("sync", sync);
+				startActivity(intent2);
+				break;
+			default:
+			break;
+		}
 		//do something when getting a register "success" event
 		
 		//...register "failure" both cases
@@ -266,7 +309,7 @@ public class RegisterActivity extends ListActivity implements ChatEventListener{
 		//...register "failure" already registered
 		
 		//...get clients
-		
+
 		
 	}
 	

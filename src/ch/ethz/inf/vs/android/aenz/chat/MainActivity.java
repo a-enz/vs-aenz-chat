@@ -52,7 +52,7 @@ public class MainActivity extends ListActivity implements ChatEventListener {
         	this.ownNethz = extras.getString(ownNethz);
         	this.ownUsernameNumber = extras.getString(ownUsernameNumber);
         	//Retrieve ChatLogic object from ConnectionActivity
-        	this.chat = ChatLogic.getInstance(null, null);
+        	chat = ChatLogic.getInstance(this, null); //sync should be declared already so it doesn't matter
         }
 	}
 	
@@ -79,6 +79,7 @@ public class MainActivity extends ListActivity implements ChatEventListener {
 	
 
 	public void onBackPressed() {
+		super.onBackPressed();
 		try {
 			chat.sendRequest(Utils.jsonDeregister());
 		} catch (IOException | JSONException e) {
