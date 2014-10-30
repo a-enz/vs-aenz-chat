@@ -56,7 +56,8 @@ public class ChatMessage extends ChatInteraction {
 	 * @return
 	 */
 	public boolean isDeliverable(ChatMessage previous, SyncType sync) {
-		// TODO Fill me depending on sync...
+
+		//TODO¨
 		return false;
 	}
 

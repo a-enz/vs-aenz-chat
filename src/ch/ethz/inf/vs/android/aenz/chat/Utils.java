@@ -142,7 +142,7 @@ public class Utils {
 
 	/**
 	 * This function is used to parse the clients from messages received.
-	 * @param json The JSON received from the server ("client" field)
+	 * @param json The JSON received from the server
 	 * @return The data in the right format
 	 * @throws JSONException 
 	 */
