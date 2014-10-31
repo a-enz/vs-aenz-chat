@@ -1,11 +1,14 @@
 package ch.ethz.inf.vs.android.aenz.chat;
 
 import java.io.IOException;
+import java.net.HttpURLConnection;
 import java.net.InetAddress;
+import java.net.URL;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import org.apache.http.HttpResponse;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -28,6 +31,7 @@ import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
@@ -39,7 +43,7 @@ import android.widget.RadioGroup;
  *
  */
 public class RegisterActivity extends ListActivity implements ChatEventListener{
-	// TODO add more... Look at activity_register.xml
+	
 	private static final String TAG = "RegisterActivity";
 	
 	private UDPCommunicator comm; //for testing purposes only
@@ -64,6 +68,8 @@ public class RegisterActivity extends ListActivity implements ChatEventListener{
 	private EditText numberText;
 	
 	private RadioGroup stateSelect;
+	
+	private CheckBox rememberMeCheck;
 	
 	
 
@@ -90,6 +96,7 @@ public class RegisterActivity extends ListActivity implements ChatEventListener{
 	private String nethz;
 	private String number;
 	private SyncType sync;
+	private boolean stayLoggedIn;
 	
 	/**
 	 * This handles the callbacks between the chatLogic and 
@@ -113,7 +120,7 @@ public class RegisterActivity extends ListActivity implements ChatEventListener{
 		this.nethzText = (EditText) findViewById(R.id.username);
 		this.numberText = (EditText) findViewById(R.id.number);
 		this.stateSelect = (RadioGroup) findViewById(R.id.radioGroup);
-		// TODO: Verify that a connection is available and proceed to register.
+		this.rememberMeCheck = (CheckBox) findViewById(R.id.remember);
 
 		//TODO is this okay? not really i think
 		chat = ChatLogic.getInstance(this, null);
@@ -128,6 +135,7 @@ public class RegisterActivity extends ListActivity implements ChatEventListener{
 					//read login data from UI
 					nethz = nethzText.getText().toString();
 					number = numberText.getText().toString();
+					stayLoggedIn = rememberMeCheck.isChecked();
 	
 					//create ChatLogic in correct mode
 					if(stateSelect.getCheckedRadioButtonId() == R.id.lamportRadio){
@@ -199,18 +207,21 @@ public class RegisterActivity extends ListActivity implements ChatEventListener{
 	 * @throws IOException 
 	 */
 	private boolean isOnline() {
-		try {
-			Log.d(TAG, "trying to contact server: ");
-			boolean available = InetAddress.getByName("8.8.8.8").isReachable(1000);
-			Log.d(TAG, "google dns reachable: " + available);
-			return true; //TODO do this properly
-		} catch (UnknownHostException e) {
+		boolean available = false;
+		try{
+			URL url = new URL("http://www.google.com");
+			HttpURLConnection urlConnect = (HttpURLConnection) url.openConnection();
+			urlConnect.setConnectTimeout(600);
+			urlConnect.getContent();
+			available = true;
+		} catch(NullPointerException np){
+			np.printStackTrace();
+		} catch (IOException e){
 			e.printStackTrace();
-			return false;
-		} catch (IOException e) {
-			e.printStackTrace();
-			return false;
 		}
+		
+		Log.d(TAG, "Google website is available: " + available);
+		return available;
 	}
 
 	/**
@@ -265,21 +276,21 @@ public class RegisterActivity extends ListActivity implements ChatEventListener{
 				Lamport lamport = null;
 				VectorClock vClock = null;
 				
-			try {
-				//extract and create initial lamport
-				lamport = new Lamport(response.getInt("init_lamport"));
-				
-				//extract and create initial vector clock
-				HashMap<Integer, Integer> initVectorClock = Utils.parseVectorClockJSON(response.getJSONObject("init_time_vector"));
-				int index = Integer.parseInt(response.getString("index"));
-				vClock = new VectorClock(initVectorClock, index);
-				
-			} catch (JSONException e1) {
+				try {
+					//extract and create initial lamport
+					lamport = new Lamport(response.getInt("init_lamport"));
+					
+					//extract and create initial vector clock
+					HashMap<Integer, Integer> initVectorClock = Utils.parseVectorClockJSON(response.getJSONObject("init_time_vector"));
+					int index = Integer.parseInt(response.getString("index"));
+					vClock = new VectorClock(initVectorClock, index);
+					
+				} catch (JSONException e1) {
 				// TODO Auto-generated catch block
-				e1.printStackTrace();
-				errorMessage("Extracting initial TimeVector failed").show();
-				break;
-			}
+					e1.printStackTrace();
+					errorMessage("Extracting initial TimeVector failed").show();
+					break;
+				}
 				
 				Intent intent = new Intent(getInstance(), MainActivity.class);
 				intent.putExtra("ownNethz", nethz);
@@ -287,6 +298,7 @@ public class RegisterActivity extends ListActivity implements ChatEventListener{
 				intent.putExtra("sync", sync);
 				intent.putExtra("vecClock", vClock);
 				intent.putExtra("lamport", lamport);
+				intent.putExtra("stayLoggedIn", stayLoggedIn);
 				startActivity(intent);
 				
 				break;
@@ -295,12 +307,16 @@ public class RegisterActivity extends ListActivity implements ChatEventListener{
 						"register with an invalid username").show();
 				break;
 			case NOT_REGISTERED:
+				errorMessage("Registering failed.").show();
+				break;
 			case ALREADY_REGISTERED:
 				Intent intent2 = new Intent(getInstance(), MainActivity.class);
 				intent2.putExtra("ownNethz", nethz);
 				intent2.putExtra("ownUsernameNumber", number);
 				intent2.putExtra("sync", sync);
+				intent2.putExtra("stayLoggedIn", stayLoggedIn);
 				startActivity(intent2);
+				//TODO
 				break;
 			default:
 			break;
