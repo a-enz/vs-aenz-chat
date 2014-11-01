@@ -79,6 +79,8 @@ public class ChatLogic extends ChatEventSource implements Serializable{
 	private Lamport bufferClock;	//timestamp were waiting for
 	
 	private int id;
+
+	private VectorClock vectorClock;
 	
 	/**
 	 * This function should initialize the logger as
@@ -99,6 +101,13 @@ public class ChatLogic extends ChatEventSource implements Serializable{
 	public static ChatLogic getInstance(Context context, SyncType sync) {
 		return (singleton == null ? (singleton = new ChatLogic(context, sync)) : singleton);
 	}
+	
+	//use this in registry
+	public void setTime(Lamport lamport, VectorClock vectorClock) {
+		this.lamport = lamport;
+		this.vectorClock = vectorClock;
+	}
+	
 	
 	public void setSyncType(SyncType sync){
 		this.sync = sync;
@@ -231,6 +240,18 @@ public class ChatLogic extends ChatEventSource implements Serializable{
 		new Thread() {
 			private final String TAG = "Receiver";
 			
+			private final Handler handler = new Handler();
+			
+			private final Runnable timeout = new Runnable() {
+				@Override
+				public void run(){
+					if(!lamportBuffer.isEmpty()){
+						lamportBuffer.remove(0);
+						bufferClock.tick();
+					}
+				}
+			};
+			
 			/**
 			 * Decides whether the incoming broadcast message is delivered instantly as event or buffered
 			 * @param message
@@ -247,6 +268,7 @@ public class ChatLogic extends ChatEventSource implements Serializable{
 					lamportBuffer.ensureCapacity(pos+1);
 					lamportBuffer.add(pos, message);
 					ChatMessage current;
+					refreshTimer();
 					while((current = lamportBuffer.remove(0)) != null){
 						if(current.getSender() != id){
 							ChatEvent e = new ChatEvent(this, Utils.ChatEventType.MSG_BROADCAST, null);
@@ -262,6 +284,11 @@ public class ChatLogic extends ChatEventSource implements Serializable{
 					msg.obj = e;
 					receiveHandler.sendMessage(msg);
 				}
+			}
+			
+			private void refreshTimer() {
+				handler.removeCallbacks(timeout);
+				handler.postDelayed(timeout, Utils.MESSAGE_TIMEOUT);
 			}
 			
 			public void run() {

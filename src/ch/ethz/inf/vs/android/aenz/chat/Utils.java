@@ -46,7 +46,7 @@ public class Utils {
 	public final static int RECEIVE_BUFFER_SIZE = 4096;
 	public final static int SOCKET_TIMEOUT = -1;
 	public final static int RESPONSE_TIMEOUT = -1;
-	public final static int MESSAGE_TIMEOUT = -1;
+	public final static int MESSAGE_TIMEOUT = 1000;
 
 	// TODO Fill me with macros for the states
 	

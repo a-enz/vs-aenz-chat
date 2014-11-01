@@ -285,6 +285,8 @@ public class RegisterActivity extends ListActivity implements ChatEventListener{
 					int index = Integer.parseInt(response.getString("index"));
 					vClock = new VectorClock(initVectorClock, index);
 					
+					chat.setTime(lamport, vClock);
+					
 				} catch (JSONException e1) {
 				// TODO Auto-generated catch block
 					e1.printStackTrace();
@@ -295,9 +297,6 @@ public class RegisterActivity extends ListActivity implements ChatEventListener{
 				Intent intent = new Intent(getInstance(), MainActivity.class);
 				intent.putExtra("ownNethz", nethz);
 				intent.putExtra("ownUsernameNumber", number);
-				intent.putExtra("sync", sync);
-				intent.putExtra("vecClock", vClock);
-				intent.putExtra("lamport", lamport);
 				intent.putExtra("stayLoggedIn", stayLoggedIn);
 				startActivity(intent);
 				
@@ -313,7 +312,6 @@ public class RegisterActivity extends ListActivity implements ChatEventListener{
 				Intent intent2 = new Intent(getInstance(), MainActivity.class);
 				intent2.putExtra("ownNethz", nethz);
 				intent2.putExtra("ownUsernameNumber", number);
-				intent2.putExtra("sync", sync);
 				intent2.putExtra("stayLoggedIn", stayLoggedIn);
 				startActivity(intent2);
 				//TODO
