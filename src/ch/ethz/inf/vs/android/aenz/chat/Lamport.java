@@ -45,9 +45,9 @@ public class Lamport implements Comparable<Lamport>, Serializable {
 	 */
 	public int compareTo(Lamport toCompare) {
 		int result = 0;
-		if(this.value < toCompare.value) {
+		if(this.value < toCompare.getValue()) {
 			result = -1;
-		} else if (this.value > toCompare.value) {
+		} else if (this.value > toCompare.getValue()) {
 			result = 1;
 		}
 		return result;
