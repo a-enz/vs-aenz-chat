@@ -347,5 +347,9 @@ public class ChatLogic extends ChatEventSource implements Serializable{
 		}.start();
 	}
 	
+	
+	public SyncType getSyncType() {
+		return sync;
+	}
 
 }

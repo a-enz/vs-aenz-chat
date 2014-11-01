@@ -22,7 +22,8 @@ import android.widget.ListView;
 public class MainActivity extends ListActivity implements ChatEventListener {
 	private ChatLogic chat;
 	ArrayList<DisplayMessage> displayMessages;
-	SyncType sync;
+	//Not needed i guess
+	//SyncType sync;
 	DisplayMessageAdapter adapter;
 	EditText text;
 	String sender;
@@ -58,6 +59,10 @@ public class MainActivity extends ListActivity implements ChatEventListener {
         	//Retrieve ChatLogic object from ConnectionActivity
         	chat = ChatLogic.getInstance(this, null,ownUsername); //sync should be declared already so it doesn't matter
         }
+        
+        lamport = new Lamport(0);
+        HashMap<Integer,Integer> temp = new HashMap<Integer,Integer>();
+        vecClock = new VectorClock(temp, Integer.valueOf(ownUsernameNumber));
 	}
 	
 	public void fetchTheUserList() {
@@ -85,7 +90,7 @@ public class MainActivity extends ListActivity implements ChatEventListener {
 		int senderNumber = Integer.parseInt(this.ownUsernameNumber);
 		ChatMessage message = null;
 		if(!text_to_send.isEmpty()) {
-			message = new ChatMessage(Utils.ChatEventType.WE_SEND,senderNumber,text_to_send,lamport,vecClock, 007,sync);
+			message = new ChatMessage(Utils.ChatEventType.WE_SEND,senderNumber,text_to_send,lamport,vecClock, 007,chat.getSyncType());
 			try {
 				chat.sendRequest(message);
 			} catch (IOException | JSONException e) {
@@ -144,7 +149,7 @@ public class MainActivity extends ListActivity implements ChatEventListener {
 		}
 	}
 	/*
-	 * Parse the join into useable data
+	 * Parse the join into usable data
 	 */
 	public void registerNewUser(JSONObject object){
 		if (object != null) {
