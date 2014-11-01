@@ -82,6 +82,8 @@ public class ChatLogic extends ChatEventSource implements Serializable{
 
 	private VectorClock vectorClock;
 	
+	private String userName;
+	
 	/**
 	 * This function should initialize the logger as
 	 * soon as the username is registered.
@@ -96,16 +98,22 @@ public class ChatLogic extends ChatEventSource implements Serializable{
 	 * if the chatlogic has already been createt, the parameter will have no effect
 	 * @param context
 	 * @param sync
+	 * @deprecated
 	 * @return
 	 */
 	public static ChatLogic getInstance(Context context, SyncType sync) {
-		return (singleton == null ? (singleton = new ChatLogic(context, sync)) : singleton);
+		return (singleton == null ? (singleton = new ChatLogic(context, sync, "deprecated")) : singleton);
+	}
+	
+	public static ChatLogic getInstance(Context context, SyncType sync, String userName){
+		return (singleton == null ? (singleton = new ChatLogic(context, sync, userName)) : singleton);
 	}
 	
 	//use this in registry
 	public void setTime(Lamport lamport, VectorClock vectorClock) {
 		this.lamport = lamport;
 		this.vectorClock = vectorClock;
+		this.id = vectorClock.getOwnId();
 	}
 	
 	
@@ -123,10 +131,12 @@ public class ChatLogic extends ChatEventSource implements Serializable{
 	 * @param context Context of the Activity
 	 * @param sync Indicates whether Lamport timestamps or Vector clocks should be used
 	 */
-	private ChatLogic(Context context, SyncType sync) {
+	private ChatLogic(Context context, SyncType sync, String userName) {
 		listening = false;
 		comm = new UDPCommunicator();
 		this.sync = sync;
+		this.userName = userName;
+		initLogger(userName);
 		initReceiver();
 	}
 	
@@ -144,6 +154,7 @@ public class ChatLogic extends ChatEventSource implements Serializable{
 	public void sendRequest(ChatMessage message) throws IOException, JSONException{
 		lamportBuffer.add(message.getLamportTime().getValue()-bufferClock.getValue(), message);
 		comm.sendRequest(Utils.jsonMessage(message.getText(), message.getVectorTime(), message.getLamportTime()));
+		log.logReadyMsg(message, false);
 	}
 	
 	
@@ -276,6 +287,7 @@ public class ChatLogic extends ChatEventSource implements Serializable{
 							msg.obj = e;
 							bufferClock.tick();
 							receiveHandler.sendMessage(msg);
+							log.logReadyMsg(current, true);
 						}
 					}
 				} else { //a message which should have come way earlier, display anyway
