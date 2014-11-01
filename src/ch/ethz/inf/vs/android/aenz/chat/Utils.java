@@ -126,7 +126,7 @@ public class Utils {
 	 */
 	public static HashMap<Integer, Integer> parseVectorClockJSON(JSONObject json) throws JSONException {
 		// TODO Fill me
-		Log.d(TAG, "vector successfuly extracted. Length: " + json.length());
+		Log.d(TAG, "vector successfuly extracted. Length: " + json.toString());
 		HashMap<Integer, Integer> result = new HashMap<Integer, Integer>();
 		Iterator<String> indexIter = json.keys();
 		String index;

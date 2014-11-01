@@ -14,6 +14,8 @@ import android.app.ListActivity;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.StrictMode;
+import android.util.Log;
+import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
@@ -39,6 +41,8 @@ public class MainActivity extends ListActivity implements ChatEventListener {
 	
 	final Handler callbackHandler = new Handler();
 	
+	private static final String TAG = "Main Activity";
+	
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -50,6 +54,7 @@ public class MainActivity extends ListActivity implements ChatEventListener {
         Bundle extras = getIntent().getExtras();
         if (extras == null){
         	//oh boy fucked up
+        	Log.d(TAG, "extras not received");
         } else {
         	this.ownNethz = extras.getString(ownNethz);
         	this.ownUsernameNumber = extras.getString(ownUsernameNumber);
@@ -77,7 +82,7 @@ public class MainActivity extends ListActivity implements ChatEventListener {
 	}
 	
 	
-	public void sendMessage(){
+	public void sendMessage(View v){
 		text = ((EditText) findViewById(R.id.text));
 		String text_to_send = text.getText().toString();
 		int senderNumber = Integer.parseInt(this.ownUsernameNumber);
