@@ -15,6 +15,7 @@ import android.app.ListActivity;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.StrictMode;
+import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
@@ -87,8 +88,7 @@ public class MainActivity extends ListActivity implements ChatEventListener {
 		return name;
 	}
 	
-	
-	public void sendMessage(){
+	public void sendMessage(View v){
 		text = ((EditText) findViewById(R.id.text));
 		String text_to_send = text.getText().toString();
 		int senderNumber = Integer.parseInt(this.ownUsernameNumber);

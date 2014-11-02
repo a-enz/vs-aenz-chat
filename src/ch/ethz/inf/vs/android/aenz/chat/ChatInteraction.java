@@ -22,7 +22,7 @@ public abstract class ChatInteraction {
 	 * The original JSON data received
 	 */
 	protected JSONObject jsonMap;
-
+	
 	/**
 	 * Constructor
 	 */
