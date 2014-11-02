@@ -98,6 +98,8 @@ public class RegisterActivity extends ListActivity implements ChatEventListener{
 	private SyncType sync;
 	private boolean stayLoggedIn;
 	
+	private boolean listening = false;
+	
 	/**
 	 * This handles the callbacks between the chatLogic and 
 	 * the activity
@@ -123,8 +125,13 @@ public class RegisterActivity extends ListActivity implements ChatEventListener{
 		this.rememberMeCheck = (CheckBox) findViewById(R.id.remember);
 
 		//TODO is this okay? not really i think
-		chat = ChatLogic.getInstance(this, null);
-		chat.addChatEventListener(this);
+		if(!listening){
+			chat = ChatLogic.getInstance(this, null);
+			Log.d(TAG, "adding this as Listener");
+			chat.addChatEventListener(this);
+			listening = true;
+		}
+		
 		
 		this.loginButton.setOnClickListener(new OnClickListener() {
 
@@ -310,12 +317,7 @@ public class RegisterActivity extends ListActivity implements ChatEventListener{
 				errorMessage("Registering failed.").show();
 				break;
 			case ALREADY_REGISTERED:
-				Intent intent2 = new Intent(getInstance(), MainActivity.class);
-				intent2.putExtra("ownNethz", nethz);
-				intent2.putExtra("ownUsernameNumber", number);
-				intent2.putExtra("stayLoggedIn", stayLoggedIn);
-				startActivity(intent2);
-				//TODO
+				errorMessage("You are already registered").show();
 				break;
 			default:
 			break;
