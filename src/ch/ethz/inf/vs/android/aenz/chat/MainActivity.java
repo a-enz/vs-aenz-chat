@@ -66,6 +66,11 @@ public class MainActivity extends ListActivity implements ChatEventListener {
         	this.stayLoggedIn = extras.getBoolean("stayLoggedIn");
         	//Retrieve ChatLogic object from ConnectionActivity
         	chat = ChatLogic.getInstance(this, null,ownUsername); //sync should be declared already so it doesn't matter
+        	chat.addChatEventListener(this);
+        	this.adapter = new DisplayMessageAdapter(this, new ArrayList<DisplayMessage>());
+    		ListView mListView = (ListView) findViewById(android.R.id.list);
+        	mListView.setAdapter(adapter);
+        	userList = new HashMap<Integer,String>();
         }
         /*
         lamport = chat.tagLamport();
@@ -110,8 +115,9 @@ public class MainActivity extends ListActivity implements ChatEventListener {
 		DisplayMessage displ = new DisplayMessage(text_to_send, ownUsername, true);
 		adapter.add(displ);
 		
-		ListView mListView = (ListView) findViewById(android.R.id.list);
-		mListView.setAdapter(adapter);
+//		mListView.setAdapter(adapter);
+		adapter.notifyDataSetChanged();
+		text.setText("");
 	}
 	
 	@Override
@@ -155,11 +161,11 @@ public class MainActivity extends ListActivity implements ChatEventListener {
 			} else {
 				name = whoIs(identifier);
 			}
+			Log.d("Main", "message: " + text);
 			DisplayMessage displ = new DisplayMessage(text, name, me);
 			adapter.add(displ);
 			
-			ListView mListView = (ListView) findViewById(android.R.id.list);
-			mListView.setAdapter(adapter);
+			adapter.notifyDataSetChanged();
 		}
 	}
 	/*

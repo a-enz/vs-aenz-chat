@@ -283,7 +283,7 @@ public class ChatLogic extends ChatEventSource implements Serializable{
 					lamportBuffer.add(pos, message);
 					ChatMessage current;
 					refreshTimer();
-					while((current = lamportBuffer.remove(0)) != null){
+					while(!lamportBuffer.isEmpty() && (current = lamportBuffer.remove(0)) != null){
 						if(current.getSender() != id){
 							ChatEvent e = new ChatEvent(this, Utils.ChatEventType.MSG_BROADCAST, current, null);
 							Message msg = Message.obtain();
