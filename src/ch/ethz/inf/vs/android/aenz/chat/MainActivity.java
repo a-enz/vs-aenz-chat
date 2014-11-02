@@ -102,6 +102,11 @@ public class MainActivity extends ListActivity implements ChatEventListener {
 				e.printStackTrace();
 			}
 		}
+		DisplayMessage displ = new DisplayMessage(text_to_send, ownUsername, true);
+		adapter.add(displ);
+		
+		ListView mListView = (ListView) findViewById(android.R.id.list);
+		mListView.setAdapter(adapter);
 	}
 	
 	@Override
