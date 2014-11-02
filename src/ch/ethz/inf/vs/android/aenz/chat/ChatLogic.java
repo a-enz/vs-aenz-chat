@@ -115,6 +115,7 @@ public class ChatLogic extends ChatEventSource implements Serializable{
 	public void setTime(Lamport lamport, VectorClock vectorClock) {
 		this.lamport = lamport;
 		this.vectorClock = vectorClock;
+		this.bufferClock = lamport;
 		this.id = vectorClock.getOwnId();
 	}
 	
@@ -306,6 +307,7 @@ public class ChatLogic extends ChatEventSource implements Serializable{
 			}
 			
 			public void run() {
+				bufferClock = new Lamport(0);
 				while(listening) {
 					try {
 						JSONObject in = comm.receiveAnswer();

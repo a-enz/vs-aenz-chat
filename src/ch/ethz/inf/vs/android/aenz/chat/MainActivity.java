@@ -32,13 +32,15 @@ public class MainActivity extends ListActivity implements ChatEventListener {
 	String ownUsername;
 	String ownNethz;
 	String ownUsernameNumber;
+	boolean stayLoggedIn;
 	
 	Button loginButton;
 	EditText nethzText;
 	EditText numberText;
-	
+	/*
 	VectorClock vecClock;
 	Lamport lamport;
+	*/
 	HashMap<Integer,String> userList;
 	
 	final Handler callbackHandler = new Handler();
@@ -58,16 +60,18 @@ public class MainActivity extends ListActivity implements ChatEventListener {
         	//oh boy fucked up
         	Log.d(TAG, "extras not received");
         } else {
-        	this.ownNethz = extras.getString(ownNethz);
-        	this.ownUsername = this.ownUsernameNumber;
-        	this.ownUsernameNumber = extras.getString(ownUsernameNumber);
+        	this.ownNethz = extras.getString("ownNethz");
+        	this.ownUsernameNumber = extras.getString("ownUsernameNumber");
+        	this.ownUsername = this.ownNethz + this.ownUsernameNumber;
+        	this.stayLoggedIn = extras.getBoolean("stayLoggedIn");
         	//Retrieve ChatLogic object from ConnectionActivity
         	chat = ChatLogic.getInstance(this, null,ownUsername); //sync should be declared already so it doesn't matter
         }
-        
-        lamport = new Lamport(0);
+        /*
+        lamport = chat.tagLamport();
         HashMap<Integer,Integer> temp = new HashMap<Integer,Integer>();
-        vecClock = new VectorClock(temp, Integer.valueOf(ownUsernameNumber));
+        vecClock = new VectorClock(temp, 007);
+        */
 	}
 	
 	public void fetchTheUserList() {
@@ -95,7 +99,7 @@ public class MainActivity extends ListActivity implements ChatEventListener {
 		int senderNumber = Integer.parseInt(this.ownUsernameNumber);
 		ChatMessage message = null;
 		if(!text_to_send.isEmpty()) {
-			message = new ChatMessage(Utils.ChatEventType.WE_SEND,senderNumber,text_to_send,lamport,vecClock, 007,chat.getSyncType());
+			message = new ChatMessage(Utils.ChatEventType.WE_SEND,senderNumber,text_to_send,chat.tagLamport(),new VectorClock(), 007,chat.getSyncType());
 			try {
 				chat.sendRequest(message);
 			} catch (IOException | JSONException e) {
@@ -103,6 +107,11 @@ public class MainActivity extends ListActivity implements ChatEventListener {
 				e.printStackTrace();
 			}
 		}
+		DisplayMessage displ = new DisplayMessage(text_to_send, ownUsername, true);
+		adapter.add(displ);
+		
+		ListView mListView = (ListView) findViewById(android.R.id.list);
+		mListView.setAdapter(adapter);
 	}
 	
 	@Override
@@ -123,7 +132,7 @@ public class MainActivity extends ListActivity implements ChatEventListener {
 
 	@Override
 	public void onReceiveChatEvent(ChatEvent e) {
-		// TODO : Update the ListView
+		// Update the ListView
 		if (e.getType() == Utils.ChatEventType.USER_JOINED) {
 			registerNewUser(e.request);
 		} else if (e.getType() == Utils.ChatEventType.USER_LEFT) {
