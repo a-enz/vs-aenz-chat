@@ -2,8 +2,12 @@ package ch.ethz.inf.vs.android.aenz.chat;
 
 import java.io.Serializable;
 import java.util.HashMap;
+import java.util.Map.Entry;
 
+import org.json.JSONException;
 import org.json.JSONObject;
+
+import android.util.Log;
 
 /**
  * This class should be used to handle vector clocks
@@ -21,6 +25,8 @@ public class VectorClock implements Comparable<VectorClock>, Serializable{
 	 * This keeps track of the owner's index
 	 */
 	private int ownIndex;
+	
+	private static final String TAG = "VectorClock";
 	
 	/**
 	 * Constructor
@@ -43,11 +49,25 @@ public class VectorClock implements Comparable<VectorClock>, Serializable{
 	/**
 	 * This converts the VectorClock to the appropriate JSON format
 	 * @return
+	 * @throws JSONException 
 	 */
-	public JSONObject convertToJSON() {
-
+	public JSONObject convertToJSON() throws JSONException {
+		String result = "{";
+		int count = 1;
+		int size = clock.size();
+		
+		for (Entry<Integer,Integer> e : clock.entrySet()){
+			result += "\"" + e.getKey() + "\": " + e.getValue();
+			if(count != size) result += ", ";
+			count++;
+		}
+		
+		result += "}";
+		
+		Log.d(TAG, result);
+		
 		// TODO Fill me
-		return null;
+		return new JSONObject(result);
 	}
 	
 	/**
