@@ -272,6 +272,7 @@ public class RegisterActivity extends ListActivity implements ChatEventListener{
 		switch(e.getType()){
 			case REGISTER_SUCCESS: 
 				//initialize lamport and vector
+				Log.d(TAG, "null? " + (e.request == null));
 				JSONObject response = e.request;
 				Lamport lamport = null;
 				VectorClock vClock = null;

@@ -27,6 +27,7 @@ import ch.ethz.inf.vs.android.aenz.chat.Utils.SyncType;
  */
 public class ChatLogic extends ChatEventSource implements Serializable{
 
+	private final String TAG = "ChatLogic";
 	/**
 	 * 
 	 */
@@ -48,6 +49,7 @@ public class ChatLogic extends ChatEventSource implements Serializable{
 
 		@Override
 		public boolean handleMessage(Message msg) {
+			Log.d(TAG, "null?" + (msg.obj == null));
 			ChatEvent e = (ChatEvent) msg.obj;
 			e.dispatchEvent();
 			return true;
@@ -136,7 +138,7 @@ public class ChatLogic extends ChatEventSource implements Serializable{
 		comm = new UDPCommunicator();
 		this.sync = sync;
 		this.userName = userName;
-		initLogger(userName);
+		//initLogger(userName);
 		initReceiver();
 	}
 	
@@ -154,7 +156,7 @@ public class ChatLogic extends ChatEventSource implements Serializable{
 	public void sendRequest(ChatMessage message) throws IOException, JSONException{
 		lamportBuffer.add(message.getLamportTime().getValue()-bufferClock.getValue(), message);
 		comm.sendRequest(Utils.jsonMessage(message.getText(), message.getVectorTime(), message.getLamportTime()));
-		log.logReadyMsg(message, false);
+		//log.logReadyMsg(message, false);
 	}
 	
 	
@@ -282,16 +284,16 @@ public class ChatLogic extends ChatEventSource implements Serializable{
 					refreshTimer();
 					while((current = lamportBuffer.remove(0)) != null){
 						if(current.getSender() != id){
-							ChatEvent e = new ChatEvent(this, Utils.ChatEventType.MSG_BROADCAST, null);
+							ChatEvent e = new ChatEvent(this, Utils.ChatEventType.MSG_BROADCAST, current, null);
 							Message msg = Message.obtain();
 							msg.obj = e;
 							bufferClock.tick();
 							receiveHandler.sendMessage(msg);
-							log.logReadyMsg(current, true);
+							//log.logReadyMsg(current, true);
 						}
 					}
 				} else { //a message which should have come way earlier, display anyway
-					ChatEvent e = new ChatEvent(this, Utils.ChatEventType.MSG_BROADCAST, message);
+					ChatEvent e = new ChatEvent(this, Utils.ChatEventType.MSG_BROADCAST, message, null);
 					Message msg = Message.obtain();
 					msg.obj = e;
 					receiveHandler.sendMessage(msg);
@@ -331,7 +333,7 @@ public class ChatLogic extends ChatEventSource implements Serializable{
 							lamport.update(chatMessage.getLamportTime());
 							bufferOrDispatch(chatMessage);
 						} else {
-							ChatEvent e = new ChatEvent(this, chatState, null);
+							ChatEvent e = new ChatEvent(this, chatState, null, in);
 							Message msg = Message.obtain();
 							msg.obj = e;
 							receiveHandler.sendMessage(msg);
@@ -345,5 +347,9 @@ public class ChatLogic extends ChatEventSource implements Serializable{
 		}.start();
 	}
 	
+	
+	public SyncType getSyncType() {
+		return sync;
+	}
 
 }

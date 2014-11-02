@@ -45,9 +45,9 @@ public class Lamport implements Comparable<Lamport>, Serializable {
 	 */
 	public int compareTo(Lamport toCompare) {
 		int result = 0;
-		if(this.value < toCompare.value) {
+		if(this.value < toCompare.getValue()) {
 			result = -1;
-		} else if (this.value > toCompare.value) {
+		} else if (this.value > toCompare.getValue()) {
 			result = 1;
 		}
 		return result;
@@ -68,6 +68,6 @@ public class Lamport implements Comparable<Lamport>, Serializable {
 	 * @return String representation of Lamport timestamps
 	 */
 	public String toString() {
-		return "Lamport: " + Integer.toString(value);
+		return Integer.toString(value);
 	}
 }
