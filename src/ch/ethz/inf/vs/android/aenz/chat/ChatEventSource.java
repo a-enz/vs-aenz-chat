@@ -49,10 +49,6 @@ public class ChatEventSource {
 		 */
 		private static final long serialVersionUID = 1930041885003089779L;
 		/**
-		 * Content of the message to be transmitted
-		 */
-		public final String message;
-		/**
 		 * Original JSON packet
 		 */
 		public JSONObject request;
@@ -75,10 +71,10 @@ public class ChatEventSource {
 		 *  The chatMessage (it is only invoked if it is truly a message else it should be NULL)
 		 */
 		
-		public ChatEvent(Object source, ChatEventType type, String message, JSONObject request, ChatMessage chatMessage) {
+		public ChatEvent(Object source, ChatEventType type, ChatMessage chatMessage) {
 			super(source);
 			this.type = type;
-			this.message = message;
+
 			this.request = request;
 			this.chatMessage = chatMessage;
 		}

@@ -52,6 +52,14 @@ public class Lamport implements Comparable<Lamport>, Serializable {
 		}
 		return result;
 	}
+	
+	public int getValue(){
+		return value;
+	}
+	
+	public void tick(){
+		value++;
+	}
 
 	@Override
 	/**

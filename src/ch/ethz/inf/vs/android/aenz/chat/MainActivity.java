@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 import org.json.JSONException;
+import org.json.JSONObject;
 
 import ch.ethz.inf.vs.android.aenz.chat.ChatEventSource.ChatEvent;
 import ch.ethz.inf.vs.android.aenz.chat.Utils.ChatEventType;
@@ -57,9 +58,10 @@ public class MainActivity extends ListActivity implements ChatEventListener {
         	Log.d(TAG, "extras not received");
         } else {
         	this.ownNethz = extras.getString(ownNethz);
+        	this.ownUsername = this.ownUsernameNumber;
         	this.ownUsernameNumber = extras.getString(ownUsernameNumber);
         	//Retrieve ChatLogic object from ConnectionActivity
-        	chat = ChatLogic.getInstance(this, null); //sync should be declared already so it doesn't matter
+        	chat = ChatLogic.getInstance(this, null,ownUsername); //sync should be declared already so it doesn't matter
         }
 	}
 	
@@ -90,8 +92,8 @@ public class MainActivity extends ListActivity implements ChatEventListener {
 		if(!text_to_send.isEmpty()) {
 			message = new ChatMessage(Utils.ChatEventType.WE_SEND,senderNumber,text_to_send,lamport,vecClock, 007,sync);
 			try {
-				chat.sendRequest(message.getJSON());
-			} catch (IOException e) {
+				chat.sendRequest(message);
+			} catch (IOException | JSONException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
@@ -118,9 +120,9 @@ public class MainActivity extends ListActivity implements ChatEventListener {
 	public void onReceiveChatEvent(ChatEvent e) {
 		// TODO : Update the ListView
 		if (e.getType() == Utils.ChatEventType.USER_JOINED) {
-			// TODO
+			registerNewUser(e.request);
 		} else if (e.getType() == Utils.ChatEventType.USER_LEFT) {
-			// TODO
+			// is it okay if I just let it like this?
 		} else if (e.getType() == Utils.ChatEventType.PARTICIPATING_USERS) {
 			try {
 				userList = Utils.parseClientsJSON(e.request);
@@ -135,7 +137,7 @@ public class MainActivity extends ListActivity implements ChatEventListener {
 			String name;
 			if (identifier == Integer.parseInt(ownUsernameNumber)){
 				me = true;
-				name = ownUsername; // Is thios correct or should it just be the nethz?
+				name = ownUsername; // Is this correct or should it just be the nethz?
 			} else {
 				name = whoIs(identifier);
 			}
@@ -144,6 +146,25 @@ public class MainActivity extends ListActivity implements ChatEventListener {
 			
 			ListView mListView = (ListView) findViewById(android.R.id.list);
 			mListView.setAdapter(adapter);
+		}
+	}
+	/*
+	 * Parse the join into useable data
+	 */
+	public void registerNewUser(JSONObject object){
+		if (object != null) {
+			try {
+				if (object.getString("cmd") == "notification") {
+					String text = object.getString("text");
+					String name = text.substring(0, text.indexOf(" "));
+					String index = text.substring(text.indexOf("("),text.indexOf(""));
+					index = index.substring(index.indexOf(" "));
+					userList.put(Integer.valueOf(index), name);
+				}
+			} catch (NumberFormatException | JSONException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		}
 	}
 }

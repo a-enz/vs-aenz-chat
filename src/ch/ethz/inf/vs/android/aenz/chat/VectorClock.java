@@ -79,4 +79,8 @@ public class VectorClock implements Comparable<VectorClock>, Serializable{
 	public String toString(){
 		return "Vector Clock" + clock.toString();
 	}
+	
+	public int getOwnId(){
+		return ownIndex;
+	}
 }

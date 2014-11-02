@@ -2,7 +2,9 @@ package ch.ethz.inf.vs.android.aenz.chat;
 
 import java.io.IOException;
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -11,7 +13,6 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.os.Handler;
 import android.os.Message;
-import android.os.Parcelable;
 import android.util.Log;
 import ch.ethz.inf.vs.android.aenz.chat.Utils.ChatEventType;
 import ch.ethz.inf.vs.android.aenz.chat.Utils.SyncType;
@@ -26,7 +27,6 @@ import ch.ethz.inf.vs.android.aenz.chat.Utils.SyncType;
  */
 public class ChatLogic extends ChatEventSource implements Serializable{
 
-	
 	/**
 	 * 
 	 */
@@ -70,7 +70,20 @@ public class ChatLogic extends ChatEventSource implements Serializable{
 	Logger log;
 	
 	private boolean listening;
+	
+	//concurrency issues
+	private Lamport lamport;
 
+	private ArrayList<ChatMessage> lamportBuffer = new ArrayList<ChatMessage>();
+	
+	private Lamport bufferClock;	//timestamp were waiting for
+	
+	private int id;
+
+	private VectorClock vectorClock;
+	
+	private String userName;
+	
 	/**
 	 * This function should initialize the logger as
 	 * soon as the username is registered.
@@ -85,11 +98,24 @@ public class ChatLogic extends ChatEventSource implements Serializable{
 	 * if the chatlogic has already been createt, the parameter will have no effect
 	 * @param context
 	 * @param sync
+	 * @deprecated
 	 * @return
 	 */
 	public static ChatLogic getInstance(Context context, SyncType sync) {
-		return (singleton == null ? (singleton = new ChatLogic(context, sync)) : singleton);
+		return (singleton == null ? (singleton = new ChatLogic(context, sync, "deprecated")) : singleton);
 	}
+	
+	public static ChatLogic getInstance(Context context, SyncType sync, String userName){
+		return (singleton == null ? (singleton = new ChatLogic(context, sync, userName)) : singleton);
+	}
+	
+	//use this in registry
+	public void setTime(Lamport lamport, VectorClock vectorClock) {
+		this.lamport = lamport;
+		this.vectorClock = vectorClock;
+		this.id = vectorClock.getOwnId();
+	}
+	
 	
 	public void setSyncType(SyncType sync){
 		this.sync = sync;
@@ -105,17 +131,37 @@ public class ChatLogic extends ChatEventSource implements Serializable{
 	 * @param context Context of the Activity
 	 * @param sync Indicates whether Lamport timestamps or Vector clocks should be used
 	 */
-	private ChatLogic(Context context, SyncType sync) {
+	private ChatLogic(Context context, SyncType sync, String userName) {
 		listening = false;
 		comm = new UDPCommunicator();
 		this.sync = sync;
+		this.userName = userName;
+		initLogger(userName);
 		initReceiver();
 	}
 	
-	//TODO
+	/**
+	 * 
+	 * @param request
+	 * @throws IOException
+	 * @deprecated
+	 */
 	public void sendRequest(JSONObject request) throws IOException {
 		//log.logReadyMsg(msg, isIncoming)
 		comm.sendRequest(request);
+	}
+	
+	public void sendRequest(ChatMessage message) throws IOException, JSONException{
+		lamportBuffer.add(message.getLamportTime().getValue()-bufferClock.getValue(), message);
+		comm.sendRequest(Utils.jsonMessage(message.getText(), message.getVectorTime(), message.getLamportTime()));
+		log.logReadyMsg(message, false);
+	}
+	
+	
+	//Use this to get lamport time
+	public Lamport tagLamport(){
+		lamport.tick();
+		return lamport;
 	}
 
 	/**
@@ -205,6 +251,58 @@ public class ChatLogic extends ChatEventSource implements Serializable{
 		new Thread() {
 			private final String TAG = "Receiver";
 			
+			private final Handler handler = new Handler();
+			
+			private final Runnable timeout = new Runnable() {
+				@Override
+				public void run(){
+					if(!lamportBuffer.isEmpty()){
+						lamportBuffer.remove(0);
+						bufferClock.tick();
+					}
+				}
+			};
+			
+			/**
+			 * Decides whether the incoming broadcast message is delivered instantly as event or buffered
+			 * @param message
+			 * @throws JSONException
+			 */
+			
+			private void bufferOrDispatch(ChatMessage message) throws JSONException {
+				int relation = message.getLamportTime().compareTo(bufferClock);
+				int pos;
+				Iterator<ChatMessage> cursor;
+				
+				if(relation >= 0) {	//the message we are waiting for or message
+					pos = message.getLamportTime().getValue() - bufferClock.getValue();
+					lamportBuffer.ensureCapacity(pos+1);
+					lamportBuffer.add(pos, message);
+					ChatMessage current;
+					refreshTimer();
+					while((current = lamportBuffer.remove(0)) != null){
+						if(current.getSender() != id){
+							ChatEvent e = new ChatEvent(this, Utils.ChatEventType.MSG_BROADCAST, null);
+							Message msg = Message.obtain();
+							msg.obj = e;
+							bufferClock.tick();
+							receiveHandler.sendMessage(msg);
+							log.logReadyMsg(current, true);
+						}
+					}
+				} else { //a message which should have come way earlier, display anyway
+					ChatEvent e = new ChatEvent(this, Utils.ChatEventType.MSG_BROADCAST, message);
+					Message msg = Message.obtain();
+					msg.obj = e;
+					receiveHandler.sendMessage(msg);
+				}
+			}
+			
+			private void refreshTimer() {
+				handler.removeCallbacks(timeout);
+				handler.postDelayed(timeout, Utils.MESSAGE_TIMEOUT);
+			}
+			
 			public void run() {
 				while(listening) {
 					try {
@@ -229,12 +327,16 @@ public class ChatLogic extends ChatEventSource implements Serializable{
 															vector, 
 															System.currentTimeMillis(), 
 															sync);
-						} else chatMessage = null;
+							
+							lamport.update(chatMessage.getLamportTime());
+							bufferOrDispatch(chatMessage);
+						} else {
+							ChatEvent e = new ChatEvent(this, chatState, null);
+							Message msg = Message.obtain();
+							msg.obj = e;
+							receiveHandler.sendMessage(msg);
+						}
 						
-						ChatEvent e = new ChatEvent(this, chatState, (in.has("text") ? in.getString("text") : ""), in, chatMessage);
-						Message msg = Message.obtain();
-						msg.obj = e;
-						receiveHandler.sendMessage(msg);
 					} catch (IOException | JSONException e) {
 						e.printStackTrace();
 					}
